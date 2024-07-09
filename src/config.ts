@@ -1,10 +1,11 @@
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from './constants'
 import { GameScene, LoadingScene } from './scenes'
 
 const CONFIG: Phaser.Types.Core.GameConfig = {
     title: 'Space Shooter',
     type: Phaser.AUTO,
-    width: 800,
-    height: 1200,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
     parent: 'game',
     scene: [LoadingScene, GameScene],
     backgroundColor: '#000000',

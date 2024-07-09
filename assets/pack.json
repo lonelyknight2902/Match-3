@@ -40,6 +40,26 @@
                 "type": "image",
                 "key": "grid",
                 "url": "assets/images/grid.png"
+            },
+            {
+                "type":"image",
+                "key":"selectedTile",
+                "url":"assets/images/selectedTile.png"
+            },
+            {
+                "type":"image",
+                "key": "muzzleFlash",
+                "url": "assets/images/muzzle_flash_8.png"
+            }, 
+            {
+                "type":"image",
+                "key": "star",
+                "url": "assets/images/star_07.png"
+            },
+            {
+                "type": "image",
+                "key": "roomBackground",
+                "url": "assets/images/roombg.png"
             }
         ]
     }
