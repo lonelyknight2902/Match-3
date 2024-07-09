@@ -22,7 +22,7 @@ class SpecialTileEffectPool {
         for (let i = 0; i < size; i++) {
             const emitter = this.scene.add.particles(0, 0, 'star', {
                 speed: { min: 100, max: 200 },
-                lifespan: 1000,
+                lifespan: 500,
                 blendMode: 'ADD',
                 gravityY: 100,
                 emitting: true,
@@ -38,10 +38,10 @@ class SpecialTileEffectPool {
         let emitter = this.emitters.find((emitter) => !emitter.active)
         if (!emitter) {
             emitter = this.scene.add.particles(0, 0, 'star', {
-                speed: { min: 100, max: 200 },
+                speed: { min: 30, max: 50 },
                 lifespan: 1000,
                 blendMode: 'ADD',
-                gravityY: 100,
+                gravityY: 10,
                 emitting: true,
                 scale: { start: 0.1, end: 0 },
             })

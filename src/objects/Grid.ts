@@ -426,38 +426,61 @@ class Grid extends Phaser.GameObjects.Container {
                     //Find where this tile lives in the theoretical grid
                     const tilePos = this.getTilePos(this.tileGrid, tile)
                     console.log(tilePos)
-
+                    this.destroyTile(tile)
                     // Remove the tile from the theoretical grid
-                    if (tilePos.x !== -1 && tilePos.y !== -1) {
-                        if (tile instanceof SpecialTile) {
-                            this.specialTileEffectPool.despawn(tile.specialEmitter)
-                            const tiles = this.getExplodedTiles(tile)
-                            tiles.forEach((tile) => {
-                                if (tile) {
-                                    const tilePos = this.getTilePos(this.tileGrid, tile)
-                                    // tile?.emitter.setPosition(tile.x, tile.y)
-                                    tile?.emitter.explode(20)
-                                    this.scene.time.delayedCall(1000, () => {
-                                        this.explosionPool.despawn(tile.emitter)
-                                    })
-                                    tile?.destroy()
-                                    this.tileGrid[tilePos.y][tilePos.x] = undefined
-                                }
-                            })
-                        } else {
-                            // tile.emitter.setPosition(tile.x, tile.y)
-                            tile.emitter.explode(20)
-                            this.scene.time.delayedCall(1000, () => {
-                                this.explosionPool.despawn(tile.emitter)
-                            })
-                            tile.destroy()
-                            this.tileGrid[tilePos.y][tilePos.x] = undefined
-                        }
-                    }
+                    // if (tilePos.x !== -1 && tilePos.y !== -1) {
+                    //     if (tile instanceof SpecialTile) {
+                    //         this.specialTileEffectPool.despawn(tile.specialEmitter)
+                    //         const tiles = this.getExplodedTiles(tile)
+                    //         tiles.forEach((tile) => {
+                    //             if (tile) {
+                    //                 const tilePos = this.getTilePos(this.tileGrid, tile)
+                    //                 // tile?.emitter.setPosition(tile.x, tile.y)
+                    //                 tile?.emitter.explode(20)
+                    //                 this.scene.time.delayedCall(1000, () => {
+                    //                     this.explosionPool.despawn(tile.emitter)
+                    //                 })
+                    //                 tile?.destroy()
+                    //                 this.tileGrid[tilePos.y][tilePos.x] = undefined
+                    //             }
+                    //         })
+                    //     } else {
+                    //         // tile.emitter.setPosition(tile.x, tile.y)
+                    //         tile.emitter.explode(20)
+                    //         this.scene.time.delayedCall(1000, () => {
+                    //             this.explosionPool.despawn(tile.emitter)
+                    //         })
+                    //         tile.destroy()
+                    //         this.tileGrid[tilePos.y][tilePos.x] = undefined
+                    //     }
+                    // }
                 }
             }
         }
         console.log(this.tileGrid)
+    }
+
+    private destroyTile(tile: Tile): void {
+        const tilePos = this.getTilePos(this.tileGrid, tile)
+        if (tilePos.x !== -1 && tilePos.y !== -1) {
+            if (tile instanceof SpecialTile) {
+                this.specialTileEffectPool.despawn(tile.specialEmitter)
+                const tiles = this.getExplodedTiles(tile)
+                tiles.forEach((currentTile) => {
+                    if (currentTile && currentTile != tile) {
+                        this.destroyTile(currentTile)
+                    }
+                })
+            }
+            const tilePos = this.getTilePos(this.tileGrid, tile)
+            // tile?.emitter.setPosition(tile.x, tile.y)
+            tile?.emitter.explode(20)
+            this.scene.time.delayedCall(1000, () => {
+                this.explosionPool.despawn(tile.emitter)
+            })
+            tile?.destroy()
+            this.tileGrid[tilePos.y][tilePos.x] = undefined
+        }
     }
 
     private getExplodedTiles(tile: Tile): (Tile | undefined)[] {
@@ -467,7 +490,10 @@ class Grid extends Phaser.GameObjects.Container {
             for (let i = tilePos.y - 1; i <= tilePos.y + 1; i++) {
                 for (let j = tilePos.x - 1; j <= tilePos.x + 1; j++) {
                     if (i >= 0 && i < BOARD_HEIGHT && j >= 0 && j < BOARD_WIDTH) {
-                        tiles.push(this.tileGrid[i][j])
+                        const explodedTile = this.tileGrid[i][j]
+                        if (explodedTile != tile) {
+                            tiles.push(this.tileGrid[i][j])
+                        }
                     }
                 }
             }

@@ -10,6 +10,7 @@ class SpecialTile extends Tile {
         this.specialEmitter = specialTileEffectPool.spawn(0, 0)
         this.specialEmitter.startFollow(this)
         this.specialEmitter.name = 'specialEmitter'
+        this.specialEmitter.setDepth(2)
     }
 }
 
