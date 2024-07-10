@@ -1,5 +1,17 @@
-import { BOARD_HEIGHT, BOARD_WIDTH, GAP, PADDING, TILE_SIZE, TYPES } from '../constants'
+import {
+    BOARD_HEIGHT,
+    BOARD_WIDTH,
+    GAP,
+    PADDING,
+    T_SHAPE_PATTERN,
+    TILE_SIZE,
+    TYPES,
+} from '../constants'
 import { ExplosionPool, SpecialTileEffectPool } from '../object-pools'
+import { ShuffleState, PlayState, MatchState, SwapState } from '../states/grid-states'
+import StateMachine from '../states/StateMachine'
+import CrossTile from './CrossTile'
+import HyperTile from './HyperTile'
 import SpecialTile from './SpecialTile'
 import Tile from './Tile'
 
@@ -13,6 +25,7 @@ class Grid extends Phaser.GameObjects.Container {
     private secondHintBox: Phaser.GameObjects.Graphics
     private explosionPool: ExplosionPool
     private specialTileEffectPool: SpecialTileEffectPool
+    private stateMachine: StateMachine
     constructor(scene: Phaser.Scene) {
         super(scene)
         this.scene = scene
@@ -29,19 +42,18 @@ class Grid extends Phaser.GameObjects.Container {
         background.displayHeight = PADDING * 2 + GAP * (BOARD_HEIGHT - 1) + TILE_SIZE * BOARD_HEIGHT
         background.height = background.displayHeight
         this.add(background)
-        for (let y = 0; y < BOARD_HEIGHT; y++) {
-            this.tileGrid[y] = []
-            for (let x = 0; x < BOARD_WIDTH; x++) {
-                const tile = this.addTile(x, y)
-                this.tileGrid[y][x] = tile
-                this.add(tile)
-                this.add(tile.emitter)
-            }
-        }
+        this.stateMachine = new StateMachine('shuffle', {
+            shuffle: new ShuffleState(this, this.scene),
+            play: new PlayState(this, this.scene),
+            match: new MatchState(this, this.scene),
+            swap: new SwapState(this, this.scene),
+        })
+        // const tileGroup = this.scene.add.group()
         this.selectedTiledOutline = this.scene.add.image(0, 0, 'selectedTile')
+        this.selectedTiledOutline.setTint(0xff0000)
         this.selectedTiledOutline.setOrigin(0.5)
-        this.selectedTiledOutline.displayWidth = TILE_SIZE
-        this.selectedTiledOutline.displayHeight = TILE_SIZE
+        this.selectedTiledOutline.displayWidth = TILE_SIZE + 10
+        this.selectedTiledOutline.displayHeight = TILE_SIZE + 10
         this.selectedTiledOutline.width = TILE_SIZE
         this.selectedTiledOutline.height = TILE_SIZE
         this.selectedTiledOutline.setVisible(false)
@@ -53,6 +65,44 @@ class Grid extends Phaser.GameObjects.Container {
         this.secondHintBox.lineStyle(5, 0xff0000)
         this.secondHintBox.strokeRect(0, 0, TILE_SIZE, TILE_SIZE)
         this.secondHintBox.setVisible(false)
+        // const circle = new Phaser.Geom.Circle(400, 300, 64)
+        // Phaser.Actions.PlaceOnCircle(tileGroup.getChildren(), circle)
+        // this.scene.tweens.add({
+        //     targets: circle,
+        //     radius: 228,
+        //     ease: 'Quintic.easeInOut',
+        //     duration: 3000,
+        //     repeat: 0,
+        //     onUpdate: () => {
+        //         Phaser.Actions.RotateAroundDistance(
+        //             tileGroup.getChildren(),
+        //             { x: 400, y: 300 },
+        //             0.1,
+        //             circle.radius
+        //         )
+        //     },
+        //     onComplete: () => {
+        //         console.log('tween complete')
+        //         for (let y = 0; y < this.tileGrid.length; y++) {
+        //             for (let x = 0; x < this.tileGrid[y].length; x++) {
+        //                 const tile = this.tileGrid[y][x]
+        //                 if (tile) {
+        //                     this.scene.tweens.add({
+        //                         targets: tile,
+        //                         x: PADDING + x * (TILE_SIZE + GAP) + TILE_SIZE / 2,
+        //                         y: PADDING + y * (TILE_SIZE + GAP) + TILE_SIZE / 2,
+        //                         ease: 'Cubic.easeInOut',
+        //                         duration: 400,
+        //                         delay: 100 * (y + x),
+        //                         repeat: 0,
+        //                         yoyo: false,
+        //                     })
+        //                 }
+        //             }
+        //         }
+        //         this.checkMatches()
+        //     },
+        // })
         this.scene.tweens.add({
             targets: this.firstHintBox,
             alpha: 0,
@@ -79,10 +129,33 @@ class Grid extends Phaser.GameObjects.Container {
         // console.log(this.width, this.height)
         this.scene.add.existing(this)
         this.scene.input.on('gameobjectdown', this.tileDown, this)
-        this.checkMatches()
     }
 
-    private addTile(x: number, y: number): Tile {
+    public update(time: number, delta: number): void {
+        this.stateMachine.update(time, delta)
+    }
+
+    public getTileGrid(): (Tile | undefined)[][] {
+        return this.tileGrid
+    }
+
+    public getFirstSelectedTile(): Tile | undefined {
+        return this.firstSelectedTile
+    }
+
+    public getSecondSelectedTile(): Tile | undefined {
+        return this.secondSelectedTile
+    }
+
+    public getFirstHintBox(): Phaser.GameObjects.Graphics {
+        return this.firstHintBox
+    }
+
+    public getSecondHintBox(): Phaser.GameObjects.Graphics {
+        return this.secondHintBox
+    }
+
+    public addTile(x: number, y: number): Tile {
         const randomType = TYPES[Phaser.Math.RND.between(0, TYPES.length - 1)]
         return new Tile({
             scene: this.scene,
@@ -92,7 +165,7 @@ class Grid extends Phaser.GameObjects.Container {
         })
     }
 
-    private tileDown(pointer: Phaser.Input.Pointer, tile: Tile, event: any) {
+    public tileDown(pointer: Phaser.Input.Pointer, tile: Tile, event: any) {
         console.log('tile down')
         if (this.canMove) {
             if (!this.firstSelectedTile) {
@@ -108,7 +181,7 @@ class Grid extends Phaser.GameObjects.Container {
                     ease: 'Sine.easeInOut',
                     duration: 200,
                     yoyo: true,
-                    repeat: 0,
+                    repeat: -1,
                 })
             } else {
                 this.secondSelectedTile = tile
@@ -126,8 +199,23 @@ class Grid extends Phaser.GameObjects.Container {
                     this.selectedTiledOutline.setVisible(false)
                     this.firstHintBox.setVisible(false)
                     this.secondHintBox.setVisible(false)
-                    this.swapTiles()
+                    // this.swapTiles()
+                    if (this.stateMachine.getState() == 'play') {
+                        this.scene.tweens.add({
+                            targets: this.secondSelectedTile,
+                            displayWidth: TILE_SIZE * 1.2,
+                            displayHeight: TILE_SIZE * 1.2,
+                            ease: 'Sine.easeInOut',
+                            duration: 200,
+                            yoyo: true,
+                            repeat: -1,
+                        })
+                        this.stateMachine.transition('swap')
+                    }
                 } else {
+                    this.scene.tweens.killTweensOf(this.firstSelectedTile)
+                    this.firstSelectedTile.displayWidth = TILE_SIZE
+                    this.firstSelectedTile.displayHeight = TILE_SIZE
                     this.firstSelectedTile = this.secondSelectedTile
                     this.selectedTiledOutline.x = this.firstSelectedTile.x
                     this.selectedTiledOutline.y = this.firstSelectedTile.y
@@ -138,14 +226,14 @@ class Grid extends Phaser.GameObjects.Container {
                         ease: 'Sine.easeInOut',
                         duration: 200,
                         yoyo: true,
-                        repeat: 0,
+                        repeat: -1,
                     })
                 }
             }
         }
     }
 
-    private swapTiles(): void {
+    public swapTiles(): void {
         if (this.firstSelectedTile && this.secondSelectedTile) {
             console.log('swap tiles')
             const firstTilePosition = {
@@ -184,7 +272,9 @@ class Grid extends Phaser.GameObjects.Container {
                 repeat: 0,
                 yoyo: false,
                 onComplete: () => {
-                    this.checkMatches()
+                    if (this.stateMachine.getState() == 'swap') {
+                        this.stateMachine.transition('match')
+                    }
                 },
             })
             this.canMove = true
@@ -203,7 +293,7 @@ class Grid extends Phaser.GameObjects.Container {
         }
     }
 
-    private checkMatches(): void {
+    public checkMatches(): boolean {
         //Call the getMatches function to check for spots where there is
         //a run of three or more tiles in a row
         const matches = this.getMatches(this.tileGrid)
@@ -211,16 +301,17 @@ class Grid extends Phaser.GameObjects.Container {
         //If there are matches, remove them
         if (matches.length > 0) {
             //Remove the tiles
-            console.log('matches: ', matches)
+            // console.log('matches: ', matches)
             this.removeTileGroup(matches)
             // Move the tiles currently on the board into their new positions
             this.resetTile()
             //Fill the board with new tiles wherever there is an empty spot
             this.fillTile()
             this.tileUp()
-            setTimeout(() => {
-                this.checkMatches()
-            }, 1000)
+            // setTimeout(() => {
+            //     this.checkMatches()
+            // }, 1000)
+            return true
         } else {
             // No match so just swap the tiles back to their original position and reset
             this.swapTiles()
@@ -232,16 +323,17 @@ class Grid extends Phaser.GameObjects.Container {
                 const randomMove = this.getPossibleMove(this.tileGrid)[
                     Phaser.Math.RND.between(0, this.getPossibleMove(this.tileGrid).length - 1)
                 ]
-                console.log(randomMove)
+                // console.log(randomMove)
                 this.firstHintBox.x = PADDING + randomMove.x1 * (TILE_SIZE + GAP)
                 this.firstHintBox.y = PADDING + randomMove.y1 * (TILE_SIZE + GAP)
-                this.firstHintBox.setVisible(true)
+                // this.firstHintBox.setVisible(true)
                 this.secondHintBox.x = PADDING + randomMove.x2 * (TILE_SIZE + GAP)
                 this.secondHintBox.y = PADDING + randomMove.y2 * (TILE_SIZE + GAP)
-                this.secondHintBox.setVisible(true)
+                // this.secondHintBox.setVisible(true)
             } else {
                 console.log('No possible move')
             }
+            return false
         }
     }
 
@@ -379,21 +471,34 @@ class Grid extends Phaser.GameObjects.Container {
             const tempArr = matches[i]
             if (tempArr.length >= 4) {
                 const upgradetilePos = this.getTilePos(this.tileGrid, tempArr[0])
-                const newTile = new SpecialTile({
-                    scene: this.scene,
-                    x: tempArr[0].x,
-                    y: tempArr[0].y,
-                    texture: tempArr[0].texture.key,
-                })
-                this.tileGrid[upgradetilePos.y][upgradetilePos.x] = newTile
-                this.add(newTile)
-                this.add(newTile.specialEmitter)
-                tempArr[0].destroy()
+                if (upgradetilePos.x !== -1 && upgradetilePos.y !== -1) {
+                    let newTile: Tile
+                    if (tempArr.length == 4) {
+                        newTile = new HyperTile({
+                            scene: this.scene,
+                            x: tempArr[0].x,
+                            y: tempArr[0].y,
+                            texture: tempArr[0].texture.key,
+                        })
+                    } else {
+                        newTile = new CrossTile({
+                            scene: this.scene,
+                            x: tempArr[0].x,
+                            y: tempArr[0].y,
+                            texture: tempArr[0].texture.key,
+                        })
+                    }
+                    this.destroyTile(tempArr[0])
+                    this.tileGrid[upgradetilePos.y][upgradetilePos.x] = newTile
+                    this.add(newTile)
+                    this.add(newTile.specialEmitter)
+                    this.bringToTop(newTile.specialEmitter)
+                }
                 for (let j = 1; j < tempArr.length; j++) {
                     const tile = tempArr[j]
                     //Find where this tile lives in the theoretical grid
                     const tilePos = this.getTilePos(this.tileGrid, tile)
-                    console.log(tilePos)
+                    // console.log(tilePos)
 
                     // Remove the tile from the theoretical grid
                     if (tilePos.x !== -1 && tilePos.y !== -1) {
@@ -407,10 +512,14 @@ class Grid extends Phaser.GameObjects.Container {
                             repeat: 0,
                             onComplete: () => {
                                 // tile.emitter.setPosition(tile.x, tile.y)
+                                // this.destroyTile(tile)
                                 tile.emitter.explode(20)
                                 this.scene.time.delayedCall(1000, () => {
                                     this.explosionPool.despawn(tile.emitter)
                                 })
+                                if (tile instanceof SpecialTile) {
+                                    this.specialTileEffectPool.despawn(tile.specialEmitter)
+                                }
                                 tile.destroy()
                             },
                         })
@@ -425,7 +534,7 @@ class Grid extends Phaser.GameObjects.Container {
                     const tile = tempArr[j]
                     //Find where this tile lives in the theoretical grid
                     const tilePos = this.getTilePos(this.tileGrid, tile)
-                    console.log(tilePos)
+                    // console.log(tilePos)
                     this.destroyTile(tile)
                     // Remove the tile from the theoretical grid
                     // if (tilePos.x !== -1 && tilePos.y !== -1) {
@@ -457,29 +566,26 @@ class Grid extends Phaser.GameObjects.Container {
                 }
             }
         }
-        console.log(this.tileGrid)
+        // console.log(this.tileGrid)
     }
 
     private destroyTile(tile: Tile): void {
         const tilePos = this.getTilePos(this.tileGrid, tile)
         if (tilePos.x !== -1 && tilePos.y !== -1) {
-            if (tile instanceof SpecialTile) {
-                this.specialTileEffectPool.despawn(tile.specialEmitter)
-                const tiles = this.getExplodedTiles(tile)
-                tiles.forEach((currentTile) => {
-                    if (currentTile && currentTile != tile) {
-                        this.destroyTile(currentTile)
-                    }
-                })
-            }
-            const tilePos = this.getTilePos(this.tileGrid, tile)
             // tile?.emitter.setPosition(tile.x, tile.y)
             tile?.emitter.explode(20)
             this.scene.time.delayedCall(1000, () => {
                 this.explosionPool.despawn(tile.emitter)
             })
-            tile?.destroy()
+            this.specialTileEffectPool.despawn(tile.specialEmitter)
+            const tiles = tile.getExplodedTile(this)
             this.tileGrid[tilePos.y][tilePos.x] = undefined
+            tiles.forEach((currentTile) => {
+                if (currentTile && currentTile !== tile) {
+                    this.destroyTile(currentTile)
+                }
+            })
+            tile?.destroy()
         }
     }
 
@@ -491,8 +597,8 @@ class Grid extends Phaser.GameObjects.Container {
                 for (let j = tilePos.x - 1; j <= tilePos.x + 1; j++) {
                     if (i >= 0 && i < BOARD_HEIGHT && j >= 0 && j < BOARD_WIDTH) {
                         const explodedTile = this.tileGrid[i][j]
-                        if (explodedTile != tile) {
-                            tiles.push(this.tileGrid[i][j])
+                        if ((i != tilePos.y || j != tilePos.x) && explodedTile) {
+                            tiles.push(explodedTile)
                         }
                     }
                 }
@@ -502,7 +608,7 @@ class Grid extends Phaser.GameObjects.Container {
         return tiles
     }
 
-    private getTilePos(tileGrid: (Tile | undefined)[][], tile: Tile): any {
+    public getTilePos(tileGrid: (Tile | undefined)[][], tile: Tile): any {
         const pos = { x: -1, y: -1 }
 
         //Find the position of a specific tile in the grid
@@ -530,6 +636,7 @@ class Grid extends Phaser.GameObjects.Container {
                     let tempTile = tileGrid[y][x]
                     tileGrid[y][x] = tileGrid[y][x + 1]
                     tileGrid[y][x + 1] = tempTile
+                    // console.log(x, y)
                     const matches = this.getMatches(tileGrid)
                     if (matches.length > 0) {
                         possibleMoves.push({ x1: x, x2: x + 1, y1: y, y2: y })
@@ -542,6 +649,7 @@ class Grid extends Phaser.GameObjects.Container {
                     let tempTile = tileGrid[y][x]
                     tileGrid[y][x] = tileGrid[y + 1][x]
                     tileGrid[y + 1][x] = tempTile
+                    // console.log(x, y)
                     const matches = this.getMatches(tileGrid)
                     if (matches.length > 0) {
                         possibleMoves.push({ x1: x, x2: x, y1: y, y2: y + 1 })
@@ -555,15 +663,21 @@ class Grid extends Phaser.GameObjects.Container {
         return possibleMoves
     }
 
-    private getMatches(tileGrid: (Tile | undefined)[][]): (Tile | undefined)[][] {
+    public getMatches(tileGrid: (Tile | undefined)[][]): (Tile | undefined)[][] {
         const matches: (Tile | undefined)[][] = []
         let groups: (Tile | undefined)[] = []
-
+        const matchGroups: { type: string; x: number; y: number; pattern: number[][] }[] = []
+        let lastMatchPosition = 0
         // Check for horizontal matches
         for (let y = 0; y < tileGrid.length; y++) {
             const tempArray = tileGrid[y]
             groups = []
             for (let x = 0; x < tempArray.length; x++) {
+                // T_SHAPE_PATTERN.forEach((pattern) => {
+                //     if (this.checkPattern(x, y, tileGrid, pattern)) {
+                //         matchGroups.push({ type: 'T', x, y, pattern })
+                //     }
+                // })
                 if (x < tempArray.length - 2) {
                     if (tileGrid[y][x] && tileGrid[y][x + 1] && tileGrid[y][x + 2]) {
                         if (
@@ -573,6 +687,16 @@ class Grid extends Phaser.GameObjects.Container {
                             if (groups.length > 0) {
                                 if (groups.indexOf(tileGrid[y][x]) == -1) {
                                     matches.push(groups)
+                                    // matchGroups.push({
+                                    //     type: `${groups.length}`,
+                                    //     x: lastMatchPosition + 1 - groups.length,
+                                    //     y: y,
+                                    //     pattern: [
+                                    //         [0, 0],
+                                    //         [1, 0],
+                                    //         [2, 0],
+                                    //     ],
+                                    // })
                                     groups = []
                                 }
                             }
@@ -588,6 +712,8 @@ class Grid extends Phaser.GameObjects.Container {
                             if (groups.indexOf(tileGrid[y][x + 2]) == -1) {
                                 groups.push(tileGrid[y][x + 2])
                             }
+
+                            lastMatchPosition = x + 2
                         }
                     }
                 }
@@ -595,6 +721,16 @@ class Grid extends Phaser.GameObjects.Container {
 
             if (groups.length > 0) {
                 matches.push(groups)
+                // matchGroups.push({
+                //     type: `${groups.length}`,
+                //     x: lastMatchPosition + 1 - groups.length,
+                //     y: y,
+                //     pattern: [
+                //         [0, 0],
+                //         [1, 0],
+                //         [2, 0],
+                //     ],
+                // })
             }
         }
 
@@ -612,6 +748,16 @@ class Grid extends Phaser.GameObjects.Container {
                             if (groups.length > 0) {
                                 if (groups.indexOf(tileGrid[i][j]) == -1) {
                                     matches.push(groups)
+                                    // matchGroups.push({
+                                    //     type: `${groups.length}`,
+                                    //     x: j,
+                                    //     y: i - groups.length,
+                                    //     pattern: [
+                                    //         [0, 0],
+                                    //         [0, 1],
+                                    //         [0, 2],
+                                    //     ],
+                                    // })
                                     groups = []
                                 }
                             }
@@ -628,10 +774,46 @@ class Grid extends Phaser.GameObjects.Container {
                         }
                     }
             }
-            if (groups.length > 0) matches.push(groups)
+            if (groups.length > 0) {
+                matches.push(groups)
+                // matchGroups.push({
+                //     type: `${groups.length}`,
+                //     x: j,
+                //     y: BOARD_HEIGHT - groups.length,
+                //     pattern: [
+                //         [0, 0],
+                //         [0, 1],
+                //         [0, 2],
+                //     ],
+                // })
+            }
         }
+        // console.log('T shape: ', matchGroups)
 
         return matches
+    }
+
+    private checkPattern(
+        x: number,
+        y: number,
+        tileGrid: (Tile | undefined)[][],
+        pattern: number[][]
+    ): boolean {
+        const tile = tileGrid[y][x]
+        if (tile) {
+            return pattern.every(([dx, dy]) => {
+                const newX = x + dx
+                const newY = y + dy
+                return (
+                    newX >= 0 &&
+                    newX < BOARD_WIDTH &&
+                    newY >= 0 &&
+                    newY < BOARD_HEIGHT &&
+                    tileGrid[newY][newX]?.texture.key === tile.texture.key
+                )
+            })
+        }
+        return false
     }
 }
 

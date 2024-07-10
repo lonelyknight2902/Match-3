@@ -4,7 +4,7 @@ import { ImageConstructor } from '../types/image'
 import Grid from './Grid'
 import Tile from './Tile'
 
-class SpecialTile extends Tile {
+class CrossTile extends Tile {
     constructor(params: ImageConstructor) {
         super(params)
         this.setTint(0xff0000)
@@ -20,14 +20,17 @@ class SpecialTile extends Tile {
         const tilePos = grid.getTilePos(tileGrid, this)
         const tiles = []
         if (tilePos.x !== -1 && tilePos.y !== -1) {
-            for (let i = tilePos.y - 1; i <= tilePos.y + 1; i++) {
-                for (let j = tilePos.x - 1; j <= tilePos.x + 1; j++) {
-                    if (i >= 0 && i < BOARD_HEIGHT && j >= 0 && j < BOARD_WIDTH) {
-                        const explodedTile = tileGrid[i][j]
-                        if ((i != tilePos.y || j != tilePos.x) && explodedTile) {
-                            tiles.push(explodedTile)
-                        }
-                    }
+            for (let i = 0; i < BOARD_HEIGHT; i++) {
+                const explodedTile = tileGrid[i][tilePos.x]
+                if (explodedTile && i !== tilePos.y) {
+                    tiles.push(explodedTile)
+                }
+            }
+
+            for (let i = 0; i < BOARD_WIDTH; i++) {
+                const explodedTile = tileGrid[tilePos.y][i]
+                if (explodedTile && i !== tilePos.x) {
+                    tiles.push(explodedTile)
                 }
             }
         }
@@ -36,4 +39,4 @@ class SpecialTile extends Tile {
     }
 }
 
-export default SpecialTile
+export default CrossTile

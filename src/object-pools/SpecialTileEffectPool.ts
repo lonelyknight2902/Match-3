@@ -48,14 +48,18 @@ class SpecialTileEffectPool {
             this.emitters.push(emitter)
         }
         emitter.setPosition(x, y)
+        emitter.start()
         emitter.setVisible(true)
         emitter.setActive(true)
         return emitter
     }
 
     public despawn(emitter: Phaser.GameObjects.Particles.ParticleEmitter): void {
-        emitter.setVisible(false)
-        emitter.setActive(false)
+        if (emitter) {
+            emitter.stop()
+            emitter.setVisible(false)
+            emitter.setActive(false)
+        }
     }
 }
 

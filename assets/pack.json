@@ -60,6 +60,11 @@
                 "type": "image",
                 "key": "roomBackground",
                 "url": "assets/images/roombg.png"
+            },
+            {
+                "type": "image",
+                "key": "topBar",
+                "url": "assets/images/topbar.png"
             }
         ]
     }

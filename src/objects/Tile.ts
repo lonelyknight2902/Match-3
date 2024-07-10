@@ -1,6 +1,7 @@
-import { TILE_SIZE } from "../constants"
-import { ExplosionPool } from "../object-pools";
-import { ImageConstructor } from "../types/image"
+import { TILE_SIZE } from '../constants'
+import { ExplosionPool } from '../object-pools'
+import { ImageConstructor } from '../types/image'
+import Grid from './Grid';
 
 class Tile extends Phaser.GameObjects.Image {
     public position: { x: number; y: number }
@@ -31,6 +32,10 @@ class Tile extends Phaser.GameObjects.Image {
         this.emitter.startFollow(this)
         this.emitter.setDepth(2)
         // this.emitter.startFollow(this)
+    }
+
+    public getExplodedTile(grid: Grid): (Tile | undefined)[] {
+        return []
     }
 }
 
