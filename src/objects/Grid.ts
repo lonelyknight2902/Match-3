@@ -517,9 +517,7 @@ class Grid extends Phaser.GameObjects.Container {
                                 this.scene.time.delayedCall(1000, () => {
                                     this.explosionPool.despawn(tile.emitter)
                                 })
-                                if (tile instanceof SpecialTile) {
-                                    this.specialTileEffectPool.despawn(tile.specialEmitter)
-                                }
+                                this.specialTileEffectPool.despawn(tile.specialEmitter)
                                 tile.destroy()
                             },
                         })
