@@ -157,17 +157,20 @@ class Grid extends Phaser.GameObjects.Container {
 
     public addTile(x: number, y: number): Tile {
         const randomType = TYPES[Phaser.Math.RND.between(0, TYPES.length - 1)]
-        return new Tile({
+        const tile = new Tile({
             scene: this.scene,
             x: PADDING + x * (TILE_SIZE + GAP) + TILE_SIZE / 2,
             y: (y >= 0 ? PADDING : -PADDING) + y * (TILE_SIZE + GAP) + TILE_SIZE / 2,
             texture: randomType,
         })
+        // tile.on('pointerdown', this.tileDown, this)
+        return tile
     }
 
     public tileDown(pointer: Phaser.Input.Pointer, tile: Tile, event: any) {
         console.log('tile down')
         if (this.canMove) {
+            console.log('haha')
             if (!this.firstSelectedTile) {
                 this.firstSelectedTile = tile
                 this.selectedTiledOutline.setVisible(true)
@@ -192,6 +195,8 @@ class Grid extends Phaser.GameObjects.Container {
                 const dy = Math.floor(
                     Math.abs(this.firstSelectedTile.y - this.secondSelectedTile.y - GAP) / TILE_SIZE
                 )
+                // console.log(this.firstSelectedTile)
+                // console.log(this.secondSelectedTile)
                 console.log(dx, dy)
                 if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
                     this.canMove = false
@@ -217,6 +222,7 @@ class Grid extends Phaser.GameObjects.Container {
                     this.firstSelectedTile.displayWidth = TILE_SIZE
                     this.firstSelectedTile.displayHeight = TILE_SIZE
                     this.firstSelectedTile = this.secondSelectedTile
+                    this.secondSelectedTile = undefined
                     this.selectedTiledOutline.x = this.firstSelectedTile.x
                     this.selectedTiledOutline.y = this.firstSelectedTile.y
                     this.scene.tweens.add({
@@ -317,22 +323,22 @@ class Grid extends Phaser.GameObjects.Container {
             this.swapTiles()
             this.tileUp()
             this.canMove = true
-            console.log('Possible move: ', this.getPossibleMove(this.tileGrid))
-            const possibleMoves = this.getPossibleMove(this.tileGrid)
-            if (possibleMoves.length > 0) {
-                const randomMove = this.getPossibleMove(this.tileGrid)[
-                    Phaser.Math.RND.between(0, this.getPossibleMove(this.tileGrid).length - 1)
-                ]
-                // console.log(randomMove)
-                this.firstHintBox.x = PADDING + randomMove.x1 * (TILE_SIZE + GAP)
-                this.firstHintBox.y = PADDING + randomMove.y1 * (TILE_SIZE + GAP)
-                // this.firstHintBox.setVisible(true)
-                this.secondHintBox.x = PADDING + randomMove.x2 * (TILE_SIZE + GAP)
-                this.secondHintBox.y = PADDING + randomMove.y2 * (TILE_SIZE + GAP)
-                // this.secondHintBox.setVisible(true)
-            } else {
-                console.log('No possible move')
-            }
+            // console.log('Possible move: ', this.getPossibleMove(this.tileGrid))
+            // const possibleMoves = this.getPossibleMove(this.tileGrid)
+            // if (possibleMoves.length > 0) {
+            //     const randomMove = this.getPossibleMove(this.tileGrid)[
+            //         Phaser.Math.RND.between(0, this.getPossibleMove(this.tileGrid).length - 1)
+            //     ]
+            //     // console.log(randomMove)
+            //     this.firstHintBox.x = PADDING + randomMove.x1 * (TILE_SIZE + GAP)
+            //     this.firstHintBox.y = PADDING + randomMove.y1 * (TILE_SIZE + GAP)
+            //     // this.firstHintBox.setVisible(true)
+            //     this.secondHintBox.x = PADDING + randomMove.x2 * (TILE_SIZE + GAP)
+            //     this.secondHintBox.y = PADDING + randomMove.y2 * (TILE_SIZE + GAP)
+            //     // this.secondHintBox.setVisible(true)
+            // } else {
+            //     console.log('No possible move')
+            // }
             return false
         }
     }
@@ -474,25 +480,25 @@ class Grid extends Phaser.GameObjects.Container {
                 if (upgradetilePos.x !== -1 && upgradetilePos.y !== -1) {
                     let newTile: Tile
                     if (tempArr.length == 4) {
-                        newTile = new HyperTile({
+                        newTile = new SpecialTile({
                             scene: this.scene,
                             x: tempArr[0].x,
                             y: tempArr[0].y,
-                            texture: tempArr[0].texture.key,
+                            texture: tempArr[0].texture.key.slice(0, 5) + '_extra',
                         })
                     } else {
                         newTile = new CrossTile({
                             scene: this.scene,
                             x: tempArr[0].x,
                             y: tempArr[0].y,
-                            texture: tempArr[0].texture.key,
+                            texture: tempArr[0].texture.key.slice(0, 5),
                         })
                     }
                     this.destroyTile(tempArr[0])
                     this.tileGrid[upgradetilePos.y][upgradetilePos.x] = newTile
                     this.add(newTile)
                     this.add(newTile.specialEmitter)
-                    this.bringToTop(newTile.specialEmitter)
+                    // this.bringToTop(newTile.specialEmitter)
                 }
                 for (let j = 1; j < tempArr.length; j++) {
                     const tile = tempArr[j]
@@ -571,7 +577,7 @@ class Grid extends Phaser.GameObjects.Container {
         const tilePos = this.getTilePos(this.tileGrid, tile)
         if (tilePos.x !== -1 && tilePos.y !== -1) {
             // tile?.emitter.setPosition(tile.x, tile.y)
-            tile?.emitter.explode(20)
+            // tile?.emitter.explode(20)
             this.scene.time.delayedCall(1000, () => {
                 this.explosionPool.despawn(tile.emitter)
             })
@@ -583,27 +589,9 @@ class Grid extends Phaser.GameObjects.Container {
                     this.destroyTile(currentTile)
                 }
             })
-            tile?.destroy()
+            tile.explode()
+            // tile?.destroy()
         }
-    }
-
-    private getExplodedTiles(tile: Tile): (Tile | undefined)[] {
-        const tilePos = this.getTilePos(this.tileGrid, tile)
-        const tiles = []
-        if (tilePos.x !== -1 && tilePos.y !== -1) {
-            for (let i = tilePos.y - 1; i <= tilePos.y + 1; i++) {
-                for (let j = tilePos.x - 1; j <= tilePos.x + 1; j++) {
-                    if (i >= 0 && i < BOARD_HEIGHT && j >= 0 && j < BOARD_WIDTH) {
-                        const explodedTile = this.tileGrid[i][j]
-                        if ((i != tilePos.y || j != tilePos.x) && explodedTile) {
-                            tiles.push(explodedTile)
-                        }
-                    }
-                }
-            }
-        }
-
-        return tiles
     }
 
     public getTilePos(tileGrid: (Tile | undefined)[][], tile: Tile): any {
@@ -624,7 +612,7 @@ class Grid extends Phaser.GameObjects.Container {
         return pos
     }
 
-    private getPossibleMove(
+    public getPossibleMove(
         tileGrid: (Tile | undefined)[][]
     ): { x1: number; x2: number; y1: number; y2: number }[] {
         const possibleMoves: { x1: number; x2: number; y1: number; y2: number }[] = []
@@ -634,7 +622,7 @@ class Grid extends Phaser.GameObjects.Container {
                     let tempTile = tileGrid[y][x]
                     tileGrid[y][x] = tileGrid[y][x + 1]
                     tileGrid[y][x + 1] = tempTile
-                    // console.log(x, y)
+                    console.log(x, y)
                     const matches = this.getMatches(tileGrid)
                     if (matches.length > 0) {
                         possibleMoves.push({ x1: x, x2: x + 1, y1: y, y2: y })
@@ -647,7 +635,7 @@ class Grid extends Phaser.GameObjects.Container {
                     let tempTile = tileGrid[y][x]
                     tileGrid[y][x] = tileGrid[y + 1][x]
                     tileGrid[y + 1][x] = tempTile
-                    // console.log(x, y)
+                    console.log(x, y)
                     const matches = this.getMatches(tileGrid)
                     if (matches.length > 0) {
                         possibleMoves.push({ x1: x, x2: x, y1: y, y2: y + 1 })
@@ -671,30 +659,39 @@ class Grid extends Phaser.GameObjects.Container {
             const tempArray = tileGrid[y]
             groups = []
             for (let x = 0; x < tempArray.length; x++) {
-                // T_SHAPE_PATTERN.forEach((pattern) => {
-                //     if (this.checkPattern(x, y, tileGrid, pattern)) {
-                //         matchGroups.push({ type: 'T', x, y, pattern })
-                //     }
-                // })
+                T_SHAPE_PATTERN.forEach((pattern) => {
+                    if (this.checkPattern(x, y, tileGrid, pattern)) {
+                        matchGroups.push({ type: 'T', x, y, pattern })
+                    }
+                })
                 if (x < tempArray.length - 2) {
                     if (tileGrid[y][x] && tileGrid[y][x + 1] && tileGrid[y][x + 2]) {
-                        if (
-                            tileGrid[y][x]?.texture.key === tileGrid[y][x + 1]?.texture.key &&
-                            tileGrid[y][x + 1]?.texture.key === tileGrid[y][x + 2]?.texture.key
-                        ) {
+                        let key1 = tileGrid[y][x]?.texture.key
+                        let key2 = tileGrid[y][x + 1]?.texture.key
+                        let key3 = tileGrid[y][x + 2]?.texture.key
+                        if (key1?.endsWith('_extra')) {
+                            key1 = key1.slice(0, -6)
+                        }
+                        if (key2?.endsWith('_extra')) {
+                            key2 = key2.slice(0, -6)
+                        }
+                        if (key3?.endsWith('_extra')) {
+                            key3 = key3.slice(0, -6)
+                        }
+                        if (key1 === key2 && key2 === key3) {
                             if (groups.length > 0) {
                                 if (groups.indexOf(tileGrid[y][x]) == -1) {
                                     matches.push(groups)
-                                    // matchGroups.push({
-                                    //     type: `${groups.length}`,
-                                    //     x: lastMatchPosition + 1 - groups.length,
-                                    //     y: y,
-                                    //     pattern: [
-                                    //         [0, 0],
-                                    //         [1, 0],
-                                    //         [2, 0],
-                                    //     ],
-                                    // })
+                                    matchGroups.push({
+                                        type: `${groups.length}`,
+                                        x: lastMatchPosition + 1 - groups.length,
+                                        y: y,
+                                        pattern: [
+                                            [0, 0],
+                                            [1, 0],
+                                            [2, 0],
+                                        ],
+                                    })
                                     groups = []
                                 }
                             }
@@ -719,18 +716,20 @@ class Grid extends Phaser.GameObjects.Container {
 
             if (groups.length > 0) {
                 matches.push(groups)
-                // matchGroups.push({
-                //     type: `${groups.length}`,
-                //     x: lastMatchPosition + 1 - groups.length,
-                //     y: y,
-                //     pattern: [
-                //         [0, 0],
-                //         [1, 0],
-                //         [2, 0],
-                //     ],
-                // })
+                matchGroups.push({
+                    type: `${groups.length}`,
+                    x: lastMatchPosition + 1 - groups.length,
+                    y: y,
+                    pattern: [
+                        [0, 0],
+                        [1, 0],
+                        [2, 0],
+                    ],
+                })
             }
         }
+
+        lastMatchPosition = 0
 
         //Check for vertical matches
         for (let j = 0; j < tileGrid.length; j++) {
@@ -739,23 +738,32 @@ class Grid extends Phaser.GameObjects.Container {
             for (let i = 0; i < tempArr.length; i++) {
                 if (i < tempArr.length - 2)
                     if (tileGrid[i][j] && tileGrid[i + 1][j] && tileGrid[i + 2][j]) {
-                        if (
-                            tileGrid[i][j]?.texture.key === tileGrid[i + 1][j]?.texture.key &&
-                            tileGrid[i + 1][j]?.texture.key === tileGrid[i + 2][j]?.texture.key
-                        ) {
+                        let key1 = tileGrid[i][j]?.texture.key
+                        let key2 = tileGrid[i + 1][j]?.texture.key
+                        let key3 = tileGrid[i + 2][j]?.texture.key
+                        if (key1?.endsWith('_extra')) {
+                            key1 = key1.slice(0, -6)
+                        }
+                        if (key2?.endsWith('_extra')) {
+                            key2 = key2.slice(0, -6)
+                        }
+                        if (key3?.endsWith('_extra')) {
+                            key3 = key3.slice(0, -6)
+                        }
+                        if (key1 === key2 && key2 === key3) {
                             if (groups.length > 0) {
                                 if (groups.indexOf(tileGrid[i][j]) == -1) {
                                     matches.push(groups)
-                                    // matchGroups.push({
-                                    //     type: `${groups.length}`,
-                                    //     x: j,
-                                    //     y: i - groups.length,
-                                    //     pattern: [
-                                    //         [0, 0],
-                                    //         [0, 1],
-                                    //         [0, 2],
-                                    //     ],
-                                    // })
+                                    matchGroups.push({
+                                        type: `${groups.length}`,
+                                        x: j,
+                                        y: lastMatchPosition + 1 - groups.length,
+                                        pattern: [
+                                            [0, 0],
+                                            [0, 1],
+                                            [0, 2],
+                                        ],
+                                    })
                                     groups = []
                                 }
                             }
@@ -769,24 +777,28 @@ class Grid extends Phaser.GameObjects.Container {
                             if (groups.indexOf(tileGrid[i + 2][j]) == -1) {
                                 groups.push(tileGrid[i + 2][j])
                             }
+
+                            lastMatchPosition = i + 2
                         }
                     }
             }
             if (groups.length > 0) {
                 matches.push(groups)
-                // matchGroups.push({
-                //     type: `${groups.length}`,
-                //     x: j,
-                //     y: BOARD_HEIGHT - groups.length,
-                //     pattern: [
-                //         [0, 0],
-                //         [0, 1],
-                //         [0, 2],
-                //     ],
-                // })
+                matchGroups.push({
+                    type: `${groups.length}`,
+                    x: j,
+                    y: lastMatchPosition + 1 - groups.length,
+                    pattern: [
+                        [0, 0],
+                        [0, 1],
+                        [0, 2],
+                    ],
+                })
             }
         }
-        // console.log('T shape: ', matchGroups)
+        if (matchGroups.length > 0) {
+            console.log('T shape: ', matchGroups)
+        }
 
         return matches
     }

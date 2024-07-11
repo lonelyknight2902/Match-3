@@ -1,9 +1,9 @@
 import { TILE_SIZE } from '../constants'
 import { ExplosionPool } from '../object-pools'
 import { ImageConstructor } from '../types/image'
-import Grid from './Grid';
+import Grid from './Grid'
 
-class Tile extends Phaser.GameObjects.Image {
+class Tile extends Phaser.GameObjects.Sprite {
     public position: { x: number; y: number }
     public emitter: Phaser.GameObjects.Particles.ParticleEmitter
     public specialEmitter: Phaser.GameObjects.Particles.ParticleEmitter
@@ -36,6 +36,28 @@ class Tile extends Phaser.GameObjects.Image {
 
     public getExplodedTile(grid: Grid): (Tile | undefined)[] {
         return []
+    }
+
+    public explode(): void {
+        this.emitter.explode(20)
+        const key = this.texture.key.slice(0, 5)
+        this.anims.create({
+            key: 'explode',
+            frames: [
+                { key: key + '_explode_4' },
+                { key: key + '_explode_3' },
+                { key: key + '_explode_2' },
+                { key: key + '_explode_1', duration: 50 },
+            ],
+            frameRate: 20,
+            repeat: 0,
+            // yoyo: true
+        })
+        this.play({
+            key: 'explode',
+        }).on('animationcomplete', () => {
+            this.destroy()
+        })
     }
 }
 

@@ -5,14 +5,15 @@ import Grid from './Grid'
 import Tile from './Tile'
 
 class HyperTile extends Tile {
+    private key: string
     constructor(params: ImageConstructor) {
         super(params)
-        this.setTint(0xff0000)
         const specialTileEffectPool = SpecialTileEffectPool.getInstance(this.scene)
         this.specialEmitter = specialTileEffectPool.spawn(0, 0)
         this.specialEmitter.startFollow(this)
         this.specialEmitter.name = 'specialEmitter'
-        this.specialEmitter.setDepth(2)
+        this.specialEmitter.setDepth(-1)
+        this.key = params.texture.slice(0, 5)
     }
 
     public getExplodedTile(grid: Grid): (Tile | undefined)[] {
@@ -25,7 +26,7 @@ class HyperTile extends Tile {
                     const explodedTile = tileGrid[i][j]
                     if (
                         explodedTile &&
-                        explodedTile.texture.key == this.texture.key &&
+                        explodedTile.texture.key.includes(this.key) &&
                         (i != tilePos.y || j != tilePos.x)
                     ) {
                         tiles.push(explodedTile)

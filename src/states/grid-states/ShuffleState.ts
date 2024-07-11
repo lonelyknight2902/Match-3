@@ -1,5 +1,5 @@
 import { BOARD_HEIGHT, BOARD_WIDTH, GAP, PADDING, SCREEN_WIDTH, TILE_SIZE } from '../../constants'
-import { Grid } from '../../objects'
+import { Grid, Tile } from '../../objects'
 import State from '../State'
 
 class ShuffleState extends State {
@@ -22,8 +22,15 @@ class ShuffleState extends State {
         const tileGrid = this.grid.getTileGrid()
         this.tileGroup.clear(true, true)
         for (let y = 0; y < BOARD_HEIGHT; y++) {
-            tileGrid[y] = []
+            // tileGrid[y] = []
+            if (!tileGrid[y]) tileGrid[y] = []
             for (let x = 0; x < BOARD_WIDTH; x++) {
+                if (tileGrid[y][x] !== undefined) {
+                    const tile: Tile = tileGrid[y][x] as Tile
+                    this.grid.remove(tile)
+                    this.grid.remove(tile.emitter)
+                    tile.destroy()
+                }
                 const tile = this.grid.addTile(x, y)
                 tileGrid[y][x] = tile
                 this.grid.add(tile)

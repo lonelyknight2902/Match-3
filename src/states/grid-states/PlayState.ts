@@ -1,3 +1,4 @@
+import { GAP, PADDING, TILE_SIZE } from '../../constants'
 import { Grid } from '../../objects'
 import State from '../State'
 
@@ -14,13 +15,27 @@ class PlayState extends State {
 
     public enter(): void {
         console.log('PlayState: enter')
-        this.grid.getTileGrid().forEach(row => {
-            row.forEach(tile => {
+        this.grid.getTileGrid().forEach((row) => {
+            row.forEach((tile) => {
                 if (tile) {
                     tile.setInteractive()
                 }
             })
         })
+        const possibleMoves = this.grid.getPossibleMove(this.grid.getTileGrid())
+        if (possibleMoves.length === 0) {
+            this.stateMachine.transition('shuffle')
+        } else {
+            const randomMove = possibleMoves[Phaser.Math.Between(0, possibleMoves.length - 1)]
+            const firstHintBox = this.grid.getFirstHintBox()
+            const secondHintBox = this.grid.getSecondHintBox()
+
+            firstHintBox.x = PADDING + randomMove.x1 * (TILE_SIZE + GAP)
+            firstHintBox.y = PADDING + randomMove.y1 * (TILE_SIZE + GAP)
+
+            secondHintBox.x = PADDING + randomMove.x2 * (TILE_SIZE + GAP)
+            secondHintBox.y = PADDING + randomMove.y2 * (TILE_SIZE + GAP)
+        }
     }
 
     public exit(): void {
@@ -28,8 +43,8 @@ class PlayState extends State {
         this.grid.getFirstHintBox().setVisible(false)
         this.grid.getSecondHintBox().setVisible(false)
         this.elapsedTime = 0
-        this.grid.getTileGrid().forEach(row => {
-            row.forEach(tile => {
+        this.grid.getTileGrid().forEach((row) => {
+            row.forEach((tile) => {
                 if (tile) {
                     tile.disableInteractive()
                 }
@@ -39,9 +54,44 @@ class PlayState extends State {
 
     public execute(time: number, delta: number): void {
         this.elapsedTime += delta
-        if (this.elapsedTime > 10000) {
+        if (this.elapsedTime > 5000) {
             this.grid.getFirstHintBox().setVisible(true)
             this.grid.getSecondHintBox().setVisible(true)
+        }
+        if (this.elapsedTime > 10000) {
+            const tileGrid = this.grid.getTileGrid()
+            for (let i = 0; i < tileGrid.length; i++) {
+                for (let j = 0; j < tileGrid[i].length; j++) {
+                    if (tileGrid[i][j]) {
+                        this.scene.tweens.add({
+                            targets: tileGrid[i][j],
+                            displayWidth: TILE_SIZE * 1.2,
+                            displayHeight: TILE_SIZE * 1.2,
+                            ease: 'Sine.easeInOut',
+                            duration: 200,
+                            delay: 50 * i + j * 50,
+                            yoyo: true,
+                            repeat: 0,
+                        })
+                    }
+                }
+            }
+            // this.grid.getTileGrid().forEach((row) => {
+            //     row.forEach((tile) => {
+            //         if (tile) {
+            //             this.scene.tweens.add({
+            //                 targets: tile,
+            //                 displayWidth: TILE_SIZE * 1.2,
+            //                 displayHeight: TILE_SIZE * 1.2,
+            //                 ease: 'Sine.easeInOut',
+            //                 duration: 200,
+            //                 yoyo: true,
+            //                 repeat: 0,
+            //             })
+            //         }
+            //     })
+            // })
+            this.elapsedTime = 0
         }
         console.log('PlayState: update')
     }
