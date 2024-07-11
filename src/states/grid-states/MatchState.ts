@@ -17,6 +17,8 @@ class MatchState extends State {
         const match = this.grid.checkMatches()
         if (!match) {
             this.stateMachine.transition('play')
+        } else {
+            this.stateMachine.transition('fill')
         }
     }
 
@@ -31,6 +33,8 @@ class MatchState extends State {
             const match = this.grid.checkMatches()
             if (!match) {
                 this.stateMachine.transition('play')
+            } else {
+                this.stateMachine.transition('fill')
             }
             this.elapsedTime = 0
         }

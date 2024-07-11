@@ -59,6 +59,7 @@ class ShuffleState extends State {
                     for (let x = 0; x < tileGrid[y].length; x++) {
                         const tile = tileGrid[y][x]
                         if (tile) {
+                            tile.state = 'created'
                             this.scene.tweens.add({
                                 targets: tile,
                                 x: PADDING + x * (TILE_SIZE + GAP) + TILE_SIZE / 2,
@@ -68,6 +69,9 @@ class ShuffleState extends State {
                                 delay: 100 * y + x * 50,
                                 repeat: 0,
                                 yoyo: false,
+                                onComplete: () => {
+                                    tile.state = 'spawned'
+                                },
                             })
                         }
                     }

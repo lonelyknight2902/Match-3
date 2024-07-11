@@ -183,6 +183,66 @@
             },
             {
                 "type": "image",
+                "key": "item1_stripes_h",
+                "url": "assets/images/items/item1/item_01_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item1_stripes_v",
+                "url": "assets/images/items/item1/item_01_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_stripes_h",
+                "url": "assets/images/items/item2/item_02_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_stripes_v",
+                "url": "assets/images/items/item2/item_02_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_stripes_h",
+                "url": "assets/images/items/item3/item_03_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_stripes_v",
+                "url": "assets/images/items/item3/item_03_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_stripes_h",
+                "url": "assets/images/items/item4/item_04_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_stripes_v",
+                "url": "assets/images/items/item4/item_04_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_stripes_h",
+                "url": "assets/images/items/item5/item_05_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_stripes_v",
+                "url": "assets/images/items/item5/item_05_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_stripes_h",
+                "url": "assets/images/items/item6/item_06_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_stripes_v",
+                "url": "assets/images/items/item6/item_06_stripes_vert.png"
+            },
+            {
+                "type": "image",
                 "key": "grid",
                 "url": "assets/images/grid.png"
             },
