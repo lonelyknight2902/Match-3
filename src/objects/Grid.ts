@@ -47,6 +47,16 @@ class Grid extends Phaser.GameObjects.Container {
         background.displayHeight = PADDING * 2 + GAP * (BOARD_HEIGHT - 1) + TILE_SIZE * BOARD_HEIGHT
         background.height = background.displayHeight
         this.add(background)
+        // for (let y = 0; y < BOARD_HEIGHT; y++) {
+        //     this.tileGrid[y] = []
+        //     for (let x = 0; x < BOARD_WIDTH; x++) {
+        //         const tile = this.addTile(x, y)
+        //         this.tileGrid[y][x] = tile
+        //         // this.tileGrid[y][x].setInteractive()
+        //         // this.tileGrid[y][x].on('pointerdown', this.tileDown, this)
+        //         // tileGroup.add(this.tileGrid[y][x])
+        //     }
+        // }
         this.stateMachine = new StateMachine('shuffle', {
             shuffle: new ShuffleState(this, scene),
             play: new PlayState(this, scene),
@@ -133,6 +143,8 @@ class Grid extends Phaser.GameObjects.Container {
             texture: randomType,
         })
         tile.state = 'created'
+        this.add(tile)
+        this.add(tile.emitter)
         // tile.on('pointerdown', this.tileDown, this)
         return tile
     }
@@ -368,7 +380,7 @@ class Grid extends Phaser.GameObjects.Container {
                         delay: rowAmount[x] * 50,
                         onComplete: () => {
                             tile.state = 'spawned'
-                        }
+                        },
                     })
                     rowAmount[x]++
                     newTiles[x].push(tile)

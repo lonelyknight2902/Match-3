@@ -31,7 +31,7 @@ class PlayState extends State {
         }
         const score = this.scoreManager.getScore()
         const milestone = this.scoreManager.getMilestone()
-        if (score >= milestone && this.grid.stateMachine.getState() === 'play') {
+        if (score >= milestone && this.grid.stateMachine.getState() === 'shuffle') {
             console.log('GamePlayState: milestone reached')
             this.stateMachine.transition('milestone')
             // this.scoreManager.setMilestone(milestone + 1000)

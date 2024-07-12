@@ -41,6 +41,10 @@ class LoadingScene extends Phaser.Scene {
 
         // load out package
         this.load.pack('preload', './assets/pack.json', 'preload')
+        this.load.spritesheet('confetti', './assets/images/confetti.png', {
+            frameWidth: 16,
+            frameHeight: 16,
+        })
     }
 
     update(): void {

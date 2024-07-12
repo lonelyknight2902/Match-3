@@ -8,6 +8,7 @@ class ShuffleState extends State {
     private tileGroup: Phaser.GameObjects.Group
     private circle: Phaser.Geom.Circle
     private elapsedTime: number
+    private spawned: boolean
     constructor(grid: Grid, scene: Phaser.Scene) {
         super()
         this.grid = grid
@@ -15,6 +16,7 @@ class ShuffleState extends State {
         this.tileGroup = this.scene.add.group()
         this.circle = new Phaser.Geom.Circle(SCREEN_WIDTH / 2, 300, 64)
         this.elapsedTime = 0
+        this.spawned = false
     }
 
     public enter(): void {
@@ -31,13 +33,36 @@ class ShuffleState extends State {
                     this.grid.remove(tile.emitter)
                     tile.destroy()
                 }
+                // if (!this.spawned) {
                 const tile = this.grid.addTile(x, y)
                 tileGrid[y][x] = tile
-                this.grid.add(tile)
-                this.grid.add(tile.emitter)
+                // this.grid.add(tile)
+                // this.grid.add(tile.emitter)
                 this.tileGroup.add(tile)
+                // }
             }
         }
+        // for (let y = 0; y < BOARD_HEIGHT; y++) {
+        //     // tileGrid[y] = []
+        //     // if (!tileGrid[y]) tileGrid[y] = []
+        //     for (let x = 0; x < BOARD_WIDTH; x++) {
+        //         const tile = tileGrid[y][x]
+        //         if (tile) {
+        //             this.tileGroup.add(tile)
+        //         }
+        //         // }
+        //     }
+        // }
+        // for(let y = 0; y < BOARD_HEIGHT; y++) {
+        //     for(let x = 0; x < BOARD_WIDTH; x++) {
+        //         const tile = this.grid.addTile(x, y)
+        //         tile = tileGrid[y][x]
+        //         this.grid.add(tile)
+        //         this.grid.add(tile.emitter)
+        //         this.tileGroup.add(tile)
+        //     }
+        // }
+        this.spawned = true
         Phaser.Actions.PlaceOnCircle(this.tileGroup.getChildren(), this.circle)
         this.scene.tweens.add({
             targets: this.circle,

@@ -1,4 +1,5 @@
 import { GAP, PADDING, TILE_SIZE } from '../../constants'
+import { ScoreManager } from '../../managers'
 import { Grid } from '../../objects'
 import State from '../State'
 
@@ -6,35 +7,45 @@ class PlayState extends State {
     private grid: Grid
     private scene: Phaser.Scene
     private elapsedTime: number
+    private scoreManager: ScoreManager
     constructor(grid: Grid, scene: Phaser.Scene) {
         super()
         this.grid = grid
         this.scene = scene
         this.elapsedTime = 0
+        this.scoreManager = ScoreManager.getInstance(this.scene)
     }
 
     public enter(): void {
         console.log('PlayState: enter')
-        this.grid.getTileGrid().forEach((row) => {
-            row.forEach((tile) => {
-                if (tile) {
-                    tile.setInteractive()
-                }
-            })
-        })
-        const possibleMoves = this.grid.getPossibleMove(this.grid.getTileGrid())
-        if (possibleMoves.length === 0) {
+        const score = this.scoreManager.getScore()
+        const milestone = this.scoreManager.getMilestone()
+        console.log(score, milestone)
+        if (score >= milestone) {
+            console.log('Its shuffle time')
             this.stateMachine.transition('shuffle')
         } else {
-            const randomMove = possibleMoves[Phaser.Math.Between(0, possibleMoves.length - 1)]
-            const firstHintBox = this.grid.getFirstHintBox()
-            const secondHintBox = this.grid.getSecondHintBox()
+            this.grid.getTileGrid().forEach((row) => {
+                row.forEach((tile) => {
+                    if (tile) {
+                        tile.setInteractive()
+                    }
+                })
+            })
+            const possibleMoves = this.grid.getPossibleMove(this.grid.getTileGrid())
+            if (possibleMoves.length === 0) {
+                this.stateMachine.transition('shuffle')
+            } else {
+                const randomMove = possibleMoves[Phaser.Math.Between(0, possibleMoves.length - 1)]
+                const firstHintBox = this.grid.getFirstHintBox()
+                const secondHintBox = this.grid.getSecondHintBox()
 
-            firstHintBox.x = PADDING + randomMove.x1 * (TILE_SIZE + GAP)
-            firstHintBox.y = PADDING + randomMove.y1 * (TILE_SIZE + GAP)
+                firstHintBox.x = PADDING + randomMove.x1 * (TILE_SIZE + GAP)
+                firstHintBox.y = PADDING + randomMove.y1 * (TILE_SIZE + GAP)
 
-            secondHintBox.x = PADDING + randomMove.x2 * (TILE_SIZE + GAP)
-            secondHintBox.y = PADDING + randomMove.y2 * (TILE_SIZE + GAP)
+                secondHintBox.x = PADDING + randomMove.x2 * (TILE_SIZE + GAP)
+                secondHintBox.y = PADDING + randomMove.y2 * (TILE_SIZE + GAP)
+            }
         }
     }
 

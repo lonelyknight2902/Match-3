@@ -5,7 +5,7 @@ class FillState extends State {
     private grid: Grid
     private scene: Phaser.Scene
     private elapsedTime: number
-    private filled: boolean
+    public filled: boolean
     constructor(grid: Grid, scene: Phaser.Scene) {
         super()
         this.grid = grid
