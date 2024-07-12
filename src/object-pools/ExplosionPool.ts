@@ -55,8 +55,11 @@ class ExplosionPool {
 
     public despawn(emitter: Phaser.GameObjects.Particles.ParticleEmitter): void {
         // emitter.stop()
-        emitter.setVisible(false)
-        emitter.setActive(false)
+        if (emitter) {
+            emitter.setVisible(false)
+            emitter.setActive(false)
+            emitter.stopFollow()
+        }
     }
 }
 

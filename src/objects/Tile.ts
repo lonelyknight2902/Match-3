@@ -1,5 +1,5 @@
 import { TILE_SIZE } from '../constants'
-import { ExplosionPool } from '../object-pools'
+import { ExplosionPool, TilesPool } from '../object-pools'
 import { ImageConstructor } from '../types/image'
 import Grid from './Grid'
 
@@ -7,6 +7,7 @@ class Tile extends Phaser.GameObjects.Sprite {
     public position: { x: number; y: number }
     public emitter: Phaser.GameObjects.Particles.ParticleEmitter
     public specialEmitter: Phaser.GameObjects.Particles.ParticleEmitter
+    private tilesPool: TilesPool
     constructor(params: ImageConstructor) {
         super(params.scene, params.x, params.y, params.texture)
         this.setOrigin(0.5, 0.5)
@@ -19,6 +20,21 @@ class Tile extends Phaser.GameObjects.Sprite {
         this.displayHeight = TILE_SIZE
         this.width = TILE_SIZE
         this.height = TILE_SIZE
+        this.tilesPool = TilesPool.getInstance(this.scene)
+        const key = this.texture.key.slice(0, 5)
+        this.anims.create({
+            key: 'explode',
+            frames: [
+                { key: key + '_explode_4' },
+                { key: key + '_explode_3' },
+                { key: key + '_explode_2' },
+                { key: key + '_explode_1', duration: 50 },
+            ],
+            frameRate: 20,
+            repeat: 0,
+            hideOnComplete: true,
+            // yoyo: true
+        })
         // this.emitter = params.scene.add.particles(this.x, this.y, 'star', {
         //     speed: { min: 100, max: 200 },
         //     lifespan: 1000,
@@ -40,19 +56,6 @@ class Tile extends Phaser.GameObjects.Sprite {
 
     public explode(): void {
         this.emitter.explode(20)
-        const key = this.texture.key.slice(0, 5)
-        this.anims.create({
-            key: 'explode',
-            frames: [
-                { key: key + '_explode_4' },
-                { key: key + '_explode_3' },
-                { key: key + '_explode_2' },
-                { key: key + '_explode_1', duration: 50 },
-            ],
-            frameRate: 20,
-            repeat: 0,
-            // yoyo: true
-        })
         this.play({
             key: 'explode',
         }).on('animationcomplete', () => {

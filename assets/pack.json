@@ -270,6 +270,21 @@
                 "type": "image",
                 "key": "topBar",
                 "url": "assets/images/topbar.png"
+            },
+            {
+                "type": "image",
+                "key": "score",
+                "url": "assets/images/user-interfaces/score_txt.png"
+            },
+            {
+                "type": "image",
+                "key": "bar",
+                "url": "assets/images/user-interfaces/gui_for_star_bar_01.png"
+            },
+            {
+                "type": "image",
+                "key": "fillBar",
+                "url": "assets/images/user-interfaces/star_bar.png"
             }
         ]
     }

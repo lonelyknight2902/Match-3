@@ -7,7 +7,8 @@ import {
     TILE_SIZE,
     TYPES,
 } from '../constants'
-import { ExplosionPool, SpecialTileEffectPool } from '../object-pools'
+import { ScoreManager } from '../managers'
+import { ExplosionPool, SpecialTileEffectPool, TilesPool } from '../object-pools'
 import { ShuffleState, PlayState, MatchState, SwapState, FillState } from '../states/grid-states'
 import StateMachine from '../states/StateMachine'
 import CrossTile from './CrossTile'
@@ -25,7 +26,9 @@ class Grid extends Phaser.GameObjects.Container {
     private secondHintBox: Phaser.GameObjects.Graphics
     private explosionPool: ExplosionPool
     private specialTileEffectPool: SpecialTileEffectPool
-    private stateMachine: StateMachine
+    private tilesPool: TilesPool
+    public stateMachine: StateMachine
+    private scoreManager: ScoreManager
     constructor(scene: Phaser.Scene) {
         super(scene)
         this.scene = scene
@@ -35,6 +38,8 @@ class Grid extends Phaser.GameObjects.Container {
         this.explosionPool.initializeWithSize(64)
         this.specialTileEffectPool = new SpecialTileEffectPool(this.scene)
         this.specialTileEffectPool.initializeWithSize(4)
+        // this.tilesPool = new TilesPool(this.scene)
+        // this.tilesPool.initializeWithSize(30)
         const background = this.scene.add.image(0, 0, 'grid')
         background.setOrigin(0)
         background.displayWidth = PADDING * 2 + GAP * (BOARD_WIDTH - 1) + TILE_SIZE * BOARD_WIDTH
@@ -43,11 +48,11 @@ class Grid extends Phaser.GameObjects.Container {
         background.height = background.displayHeight
         this.add(background)
         this.stateMachine = new StateMachine('shuffle', {
-            shuffle: new ShuffleState(this, this.scene),
-            play: new PlayState(this, this.scene),
-            match: new MatchState(this, this.scene),
-            swap: new SwapState(this, this.scene),
-            fill: new FillState(this, this.scene),
+            shuffle: new ShuffleState(this, scene),
+            play: new PlayState(this, scene),
+            match: new MatchState(this, scene),
+            swap: new SwapState(this, scene),
+            fill: new FillState(this, scene),
         })
         // const tileGroup = this.scene.add.group()
         this.selectedTiledOutline = this.scene.add.image(0, 0, 'selectedTile')
@@ -66,44 +71,6 @@ class Grid extends Phaser.GameObjects.Container {
         this.secondHintBox.lineStyle(5, 0xff0000)
         this.secondHintBox.strokeRect(0, 0, TILE_SIZE, TILE_SIZE)
         this.secondHintBox.setVisible(false)
-        // const circle = new Phaser.Geom.Circle(400, 300, 64)
-        // Phaser.Actions.PlaceOnCircle(tileGroup.getChildren(), circle)
-        // this.scene.tweens.add({
-        //     targets: circle,
-        //     radius: 228,
-        //     ease: 'Quintic.easeInOut',
-        //     duration: 3000,
-        //     repeat: 0,
-        //     onUpdate: () => {
-        //         Phaser.Actions.RotateAroundDistance(
-        //             tileGroup.getChildren(),
-        //             { x: 400, y: 300 },
-        //             0.1,
-        //             circle.radius
-        //         )
-        //     },
-        //     onComplete: () => {
-        //         console.log('tween complete')
-        //         for (let y = 0; y < this.tileGrid.length; y++) {
-        //             for (let x = 0; x < this.tileGrid[y].length; x++) {
-        //                 const tile = this.tileGrid[y][x]
-        //                 if (tile) {
-        //                     this.scene.tweens.add({
-        //                         targets: tile,
-        //                         x: PADDING + x * (TILE_SIZE + GAP) + TILE_SIZE / 2,
-        //                         y: PADDING + y * (TILE_SIZE + GAP) + TILE_SIZE / 2,
-        //                         ease: 'Cubic.easeInOut',
-        //                         duration: 400,
-        //                         delay: 100 * (y + x),
-        //                         repeat: 0,
-        //                         yoyo: false,
-        //                     })
-        //                 }
-        //             }
-        //         }
-        //         this.checkMatches()
-        //     },
-        // })
         this.scene.tweens.add({
             targets: this.firstHintBox,
             alpha: 0,
@@ -128,6 +95,7 @@ class Grid extends Phaser.GameObjects.Container {
         this.width = background.displayWidth
         this.height = background.displayHeight
         // console.log(this.width, this.height)
+        this.scoreManager = ScoreManager.getInstance(scene)
         this.scene.add.existing(this)
         this.scene.input.on('gameobjectdown', this.tileDown, this)
     }
@@ -308,9 +276,6 @@ class Grid extends Phaser.GameObjects.Container {
 
         //If there are matches, remove them
         if (matches.length > 0) {
-            //Remove the tiles
-            // console.log('matches: ', matches)
-            // this.removeTileGroup(matches)
             this.removeMatchedGroup(matches)
             // Move the tiles currently on the board into their new positions
             // this.resetTile()
@@ -326,22 +291,7 @@ class Grid extends Phaser.GameObjects.Container {
             this.swapTiles()
             this.tileUp()
             this.canMove = true
-            // console.log('Possible move: ', this.getPossibleMove(this.tileGrid))
-            // const possibleMoves = this.getPossibleMove(this.tileGrid)
-            // if (possibleMoves.length > 0) {
-            //     const randomMove = this.getPossibleMove(this.tileGrid)[
-            //         Phaser.Math.RND.between(0, this.getPossibleMove(this.tileGrid).length - 1)
-            //     ]
-            //     // console.log(randomMove)
-            //     this.firstHintBox.x = PADDING + randomMove.x1 * (TILE_SIZE + GAP)
-            //     this.firstHintBox.y = PADDING + randomMove.y1 * (TILE_SIZE + GAP)
-            //     // this.firstHintBox.setVisible(true)
-            //     this.secondHintBox.x = PADDING + randomMove.x2 * (TILE_SIZE + GAP)
-            //     this.secondHintBox.y = PADDING + randomMove.y2 * (TILE_SIZE + GAP)
-            //     // this.secondHintBox.setVisible(true)
-            // } else {
-            //     console.log('No possible move')
-            // }
+            this.scoreManager.setMultiplier(1)
             return false
         }
     }
@@ -389,32 +339,6 @@ class Grid extends Phaser.GameObjects.Container {
                 y--
             }
         }
-        // for (let y = this.tileGrid.length - 1; y > 0; y--) {
-        //     // Loop through each tile in column from bottom to top
-        //     for (let x = this.tileGrid[y].length - 1; x > 0; x--) {
-        //         // If this space is blank, but the one above it is not, move the one above down
-        //         if (this.tileGrid[y][x] === undefined && this.tileGrid[y - 1][x] !== undefined) {
-        //             // Move the tile above down one
-        //             const tempTile = this.tileGrid[y - 1][x]
-        //             this.tileGrid[y][x] = tempTile
-        //             this.tileGrid[y - 1][x] = undefined
-
-        //             this.scene.add.tween({
-        //                 targets: tempTile,
-        //                 y: PADDING + y * (TILE_SIZE + GAP),
-        //                 ease: 'Linear',
-        //                 duration: 400,
-        //                 repeat: 0,
-        //                 yoyo: false,
-        //             })
-
-        //             //The positions have changed so start this process again from the bottom
-        //             //NOTE: This is not set to me.tileGrid[i].length - 1 because it will immediately be decremented as
-        //             //we are at the end of the loop.
-        //             x = this.tileGrid[y].length
-        //         }
-        //     }
-        // }
     }
 
     public fillTile(): void {
@@ -461,159 +385,6 @@ class Grid extends Phaser.GameObjects.Container {
         this.secondSelectedTile = undefined
     }
 
-    private removeTileGroup(matches: any): void {
-        // Loop through all the matches and remove the associated tiles
-        // if (matches.length == 4) {
-        //     for (let i = 1; i < matches.length; i++) {
-        //         const tempArr = matches[i]
-        //         for (let j = 0; j < tempArr.length; j++) {
-        //             const tile = tempArr[j]
-        //             //Find where this tile lives in the theoretical grid
-        //             const tilePos = this.getTilePos(this.tileGrid, tile)
-        //             console.log(tilePos)
-
-        //             // Remove the tile from the theoretical grid
-        //             if (tilePos.x !== -1 && tilePos.y !== -1) {
-        //                 this.scene.tweens.add({
-        //                     targets: tile,
-        //                     x: matches[0].x,
-        //                     y: matches[0].y,
-        //                     ease: 'Sine.easeInOut',
-        //                     duration: 200,
-        //                     yoyo: false,
-        //                     repeat: 0,
-        //                     onComplete: () => {
-        //                         tile.emitter.setPosition(tile.x, tile.y)
-        //                         tile.emitter.explode(20)
-        //                         tile.destroy()
-        //                     },
-        //                 })
-        //                 // tile.emitter.setPosition(tile.x, tile.y)
-        //                 // tile.emitter.explode(20)
-        //                 // tile.destroy()
-        //                 this.tileGrid[tilePos.y][tilePos.x] = undefined
-        //             }
-        //         }
-        //     }
-        for (let i = 0; i < matches.length; i++) {
-            const tempArr = matches[i]
-            if (tempArr.length >= 4) {
-                const upgradetilePos = this.getTilePos(this.tileGrid, tempArr[0])
-                if (upgradetilePos.x !== -1 && upgradetilePos.y !== -1) {
-                    let newTile: Tile
-                    if (tempArr.length == 4) {
-                        newTile = new SpecialTile({
-                            scene: this.scene,
-                            x: tempArr[0].x,
-                            y: tempArr[0].y,
-                            texture: tempArr[0].texture.key.slice(0, 5) + '_extra',
-                        })
-                    } else {
-                        newTile = new CrossTile({
-                            scene: this.scene,
-                            x: tempArr[0].x,
-                            y: tempArr[0].y,
-                            texture: tempArr[0].texture.key.slice(0, 5),
-                        })
-                    }
-                    this.destroyTile(tempArr[0])
-                    this.tileGrid[upgradetilePos.y][upgradetilePos.x] = newTile
-                    this.add(newTile)
-                    this.add(newTile.specialEmitter)
-                    // this.bringToTop(newTile.specialEmitter)
-                }
-                for (let j = 1; j < tempArr.length; j++) {
-                    const tile = tempArr[j]
-                    //Find where this tile lives in the theoretical grid
-                    const tilePos = this.getTilePos(this.tileGrid, tile)
-                    // console.log(tilePos)
-
-                    // Remove the tile from the theoretical grid
-                    if (tilePos.x !== -1 && tilePos.y !== -1) {
-                        this.scene.tweens.add({
-                            targets: tile,
-                            x: tempArr[0].x,
-                            y: tempArr[0].y,
-                            ease: 'Sine.easeInOut',
-                            duration: 200,
-                            yoyo: false,
-                            repeat: 0,
-                            onComplete: () => {
-                                // tile.emitter.setPosition(tile.x, tile.y)
-                                // this.destroyTile(tile)
-                                tile.emitter.explode(20)
-                                this.scene.time.delayedCall(1000, () => {
-                                    this.explosionPool.despawn(tile.emitter)
-                                })
-                                this.specialTileEffectPool.despawn(tile.specialEmitter)
-                                tile.destroy()
-                            },
-                        })
-                        // tile.emitter.setPosition(tile.x, tile.y)
-                        // tile.emitter.explode(20)
-                        // tile.destroy()
-                        this.tileGrid[tilePos.y][tilePos.x] = undefined
-                    }
-                }
-            } else {
-                const first = tempArr[0]
-                const scoreText = this.scene.add.text(first.x, first.y, '100', {
-                    fontSize: '48px',
-                    color: '#ff0000',
-                    fontStyle: 'bold',
-                })
-                this.add(scoreText)
-                this.scene.tweens.add({
-                    targets: scoreText,
-                    y: first.y - 50,
-                    alpha: 0,
-                    ease: 'Linear',
-                    duration: 1000,
-                    repeat: 0,
-                    yoyo: false,
-                    onComplete: () => {
-                        scoreText.destroy()
-                    },
-                })
-                for (let j = 0; j < tempArr.length; j++) {
-                    const tile = tempArr[j] as Tile
-                    //Find where this tile lives in the theoretical grid
-                    const tilePos = this.getTilePos(this.tileGrid, tile)
-                    // console.log(tilePos)
-                    this.destroyTile(tile)
-                    // Remove the tile from the theoretical grid
-                    // if (tilePos.x !== -1 && tilePos.y !== -1) {
-                    //     if (tile instanceof SpecialTile) {
-                    //         this.specialTileEffectPool.despawn(tile.specialEmitter)
-                    //         const tiles = this.getExplodedTiles(tile)
-                    //         tiles.forEach((tile) => {
-                    //             if (tile) {
-                    //                 const tilePos = this.getTilePos(this.tileGrid, tile)
-                    //                 // tile?.emitter.setPosition(tile.x, tile.y)
-                    //                 tile?.emitter.explode(20)
-                    //                 this.scene.time.delayedCall(1000, () => {
-                    //                     this.explosionPool.despawn(tile.emitter)
-                    //                 })
-                    //                 tile?.destroy()
-                    //                 this.tileGrid[tilePos.y][tilePos.x] = undefined
-                    //             }
-                    //         })
-                    //     } else {
-                    //         // tile.emitter.setPosition(tile.x, tile.y)
-                    //         tile.emitter.explode(20)
-                    //         this.scene.time.delayedCall(1000, () => {
-                    //             this.explosionPool.despawn(tile.emitter)
-                    //         })
-                    //         tile.destroy()
-                    //         this.tileGrid[tilePos.y][tilePos.x] = undefined
-                    //     }
-                    // }
-                }
-            }
-        }
-        // console.log(this.tileGrid)
-    }
-
     private removeMatchedGroup(
         matches: { type: string; x: number; y: number; pattern: number[][]; priority: number }[]
     ) {
@@ -621,7 +392,13 @@ class Grid extends Phaser.GameObjects.Container {
             const match = matches[i]
             const tile = this.tileGrid[match.y][match.x]
             if (tile) {
-                const scoreText = this.scene.add.text(tile.x, tile.y, '100', {
+                const score = this.scoreManager.matchScore(match.type, match.pattern.length)
+                let multiplier = this.scoreManager.getMultiplier() + 0.2
+                if (multiplier > 3) {
+                    multiplier = 3
+                }
+                this.scoreManager.setMultiplier(multiplier)
+                const scoreText = this.scene.add.text(tile.x, tile.y, `${score}`, {
                     fontSize: '48px',
                     color: '#ff0',
                     fontStyle: 'bold',
@@ -763,7 +540,7 @@ class Grid extends Phaser.GameObjects.Container {
         }
     }
 
-    public getTilePos(tileGrid: (Tile | undefined)[][], tile: Tile): any {
+    public getTilePos(tileGrid: (Tile | undefined)[][], tile: Tile): { x: number; y: number } {
         const pos = { x: -1, y: -1 }
 
         //Find the position of a specific tile in the grid
@@ -853,16 +630,44 @@ class Grid extends Phaser.GameObjects.Container {
                                 if (groups.indexOf(tileGrid[y][x]) == -1) {
                                     matches.push(groups)
                                     const pattern = []
-                                    for (let i = 0; i < groups.length; i++) {
-                                        pattern.push([i, 0])
+                                    let movedTile: Tile | undefined
+                                    let index = 0
+                                    const index1 = groups.indexOf(this.firstSelectedTile)
+                                    const index2 = groups.indexOf(this.secondSelectedTile)
+                                    if (index1 !== -1 && this.firstSelectedTile) {
+                                        movedTile = this.firstSelectedTile
+                                        index = index1
+                                    } else if (index2 !== -1 && this.secondSelectedTile) {
+                                        movedTile = this.secondSelectedTile
+                                        index = index2
                                     }
-                                    matchGroups.push({
-                                        type: `${groups.length}`,
-                                        x: lastMatchPosition + 1 - groups.length,
-                                        y: y,
-                                        pattern,
-                                        priority: 2,
-                                    })
+                                    // for (let i = index - 1; i >= 0; i--) {
+                                    //     pattern.push([i - index, 0])
+                                    // }
+                                    // for (let i = index; i < groups.length; i++) {
+                                    //     pattern.push([i - index, 0])
+                                    // }
+                                    for (let i = 0; i < groups.length; i++) {
+                                        pattern.push([i - index, 0])
+                                    }
+                                    if (movedTile) {
+                                        const pos = this.getTilePos(this.tileGrid, movedTile)
+                                        matchGroups.push({
+                                            type: `${groups.length}`,
+                                            x: pos.x,
+                                            y: pos.y,
+                                            pattern,
+                                            priority: 2,
+                                        })
+                                    } else {
+                                        matchGroups.push({
+                                            type: `${groups.length}`,
+                                            x: lastMatchPosition + 1 - groups.length,
+                                            y: y,
+                                            pattern,
+                                            priority: 2,
+                                        })
+                                    }
                                     groups = []
                                 }
                             }
@@ -887,17 +692,39 @@ class Grid extends Phaser.GameObjects.Container {
 
             if (groups.length > 0) {
                 matches.push(groups)
+                let movedTile: Tile | undefined
+                let index = 0
                 const pattern = []
-                for (let i = 0; i < groups.length; i++) {
-                    pattern.push([i, 0])
+                const index1 = groups.indexOf(this.firstSelectedTile)
+                const index2 = groups.indexOf(this.secondSelectedTile)
+                if (index1 !== -1 && this.firstSelectedTile) {
+                    movedTile = this.firstSelectedTile
+                    index = index1
+                } else if (index2 !== -1 && this.secondSelectedTile) {
+                    movedTile = this.secondSelectedTile
+                    index = index2
                 }
-                matchGroups.push({
-                    type: `${groups.length}`,
-                    x: lastMatchPosition + 1 - groups.length,
-                    y: y,
-                    pattern,
-                    priority: 2,
-                })
+                for (let i = 0; i < groups.length; i++) {
+                    pattern.push([i - index, 0])
+                }
+                if (movedTile) {
+                    const pos = this.getTilePos(this.tileGrid, movedTile)
+                    matchGroups.push({
+                        type: `${groups.length}`,
+                        x: pos.x,
+                        y: pos.y,
+                        pattern,
+                        priority: 2,
+                    })
+                } else {
+                    matchGroups.push({
+                        type: `${groups.length}`,
+                        x: lastMatchPosition + 1 - groups.length,
+                        y: y,
+                        pattern,
+                        priority: 2,
+                    })
+                }
             }
         }
 
@@ -924,16 +751,44 @@ class Grid extends Phaser.GameObjects.Container {
                                 if (groups.indexOf(tileGrid[i][j]) == -1) {
                                     matches.push(groups)
                                     const pattern = []
-                                    for (let i = 0; i < groups.length; i++) {
-                                        pattern.push([0, i])
+                                    let movedTile: Tile | undefined
+                                    const index1 = groups.indexOf(this.firstSelectedTile)
+                                    const index2 = groups.indexOf(this.secondSelectedTile)
+                                    let index = 0
+                                    if (index1 !== -1 && this.firstSelectedTile) {
+                                        movedTile = this.firstSelectedTile
+                                        index = index1
+                                    } else if (index2 !== -1 && this.secondSelectedTile) {
+                                        movedTile = this.secondSelectedTile
+                                        index = index2
                                     }
-                                    matchGroups.push({
-                                        type: `${groups.length}`,
-                                        x: j,
-                                        y: lastMatchPosition + 1 - groups.length,
-                                        pattern,
-                                        priority: 2,
-                                    })
+                                    // for (let i = index - 1; i >= 0; i--) {
+                                    //     pattern.push([0, i - index])
+                                    // }
+                                    // for (let i = index; i < groups.length; i++) {
+                                    //     pattern.push([0, i])
+                                    // }
+                                    for (let i = 0; i < groups.length; i++) {
+                                        pattern.push([0, i - index])
+                                    }
+                                    if (movedTile) {
+                                        const pos = this.getTilePos(this.tileGrid, movedTile)
+                                        matchGroups.push({
+                                            type: `${groups.length}`,
+                                            x: pos.x,
+                                            y: pos.y,
+                                            pattern,
+                                            priority: 2,
+                                        })
+                                    } else {
+                                        matchGroups.push({
+                                            type: `${groups.length}`,
+                                            x: j,
+                                            y: lastMatchPosition + 1 - groups.length,
+                                            pattern,
+                                            priority: 2,
+                                        })
+                                    }
                                     groups = []
                                 }
                             }
@@ -955,16 +810,38 @@ class Grid extends Phaser.GameObjects.Container {
             if (groups.length > 0) {
                 matches.push(groups)
                 const pattern = []
-                for (let i = 0; i < groups.length; i++) {
-                    pattern.push([0, i])
+                let movedTile: Tile | undefined
+                const index1 = groups.indexOf(this.firstSelectedTile)
+                const index2 = groups.indexOf(this.secondSelectedTile)
+                let index = 0
+                if (index1 !== -1 && this.firstSelectedTile) {
+                    movedTile = this.firstSelectedTile
+                    index = index1
+                } else if (index2 !== -1 && this.secondSelectedTile) {
+                    movedTile = this.secondSelectedTile
+                    index = index2
                 }
-                matchGroups.push({
-                    type: `${groups.length}`,
-                    x: j,
-                    y: lastMatchPosition + 1 - groups.length,
-                    pattern,
-                    priority: 2,
-                })
+                for (let i = 0; i < groups.length; i++) {
+                    pattern.push([0, i - index])
+                }
+                if (movedTile) {
+                    const pos = this.getTilePos(this.tileGrid, movedTile)
+                    matchGroups.push({
+                        type: `${groups.length}`,
+                        x: pos.x,
+                        y: pos.y,
+                        pattern,
+                        priority: 2,
+                    })
+                } else {
+                    matchGroups.push({
+                        type: `${groups.length}`,
+                        x: j,
+                        y: lastMatchPosition + 1 - groups.length,
+                        pattern,
+                        priority: 2,
+                    })
+                }
             }
         }
         // if (matchGroups.length > 0) {
