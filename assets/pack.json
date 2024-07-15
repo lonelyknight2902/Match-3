@@ -243,6 +243,11 @@
             },
             {
                 "type": "image",
+                "key": "choco",
+                "url": "assets/images/items/candy10_choco.png"
+            },
+            {
+                "type": "image",
                 "key": "grid",
                 "url": "assets/images/grid.png"
             },

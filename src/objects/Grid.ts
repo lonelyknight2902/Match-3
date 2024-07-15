@@ -517,14 +517,24 @@ class Grid extends Phaser.GameObjects.Container {
             } else if (match.type === '4' || match.type === '5' || match.type === '6') {
                 const mergeTile = this.tileGrid[match.y][match.x]
                 if (mergeTile) {
-                    const newTile = new SpecialTile({
-                        scene: this.scene,
-                        x: mergeTile ? mergeTile.x : 0,
-                        y: mergeTile ? mergeTile.y : 0,
-                        texture: mergeTile
-                            ? mergeTile.texture.key.slice(0, 5) + '_extra'
-                            : 'item1_extra',
-                    })
+                    let newTile: Tile
+                    if (match.type === '4') {
+                        newTile = new SpecialTile({
+                            scene: this.scene,
+                            x: mergeTile ? mergeTile.x : 0,
+                            y: mergeTile ? mergeTile.y : 0,
+                            texture: mergeTile
+                                ? mergeTile.texture.key.slice(0, 5) + '_extra'
+                                : 'item1_extra',
+                        })
+                    } else {
+                        newTile = new HyperTile({
+                            scene: this.scene,
+                            x: mergeTile ? mergeTile.x : 0,
+                            y: mergeTile ? mergeTile.y: 0,
+                            texture: ''
+                        })
+                    }
                     this.add(newTile)
                     newTile.state = 'spawned'
                     for (let j = 0; j < match.pattern.length; j++) {

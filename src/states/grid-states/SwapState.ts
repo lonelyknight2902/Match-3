@@ -37,6 +37,10 @@ class SwapState extends State {
     }
     public execute(time: number, delta: number): void {
         console.log('SwapState: update')
+        this.elapsedTime += delta
+        if (this.elapsedTime > 400) {
+            this.stateMachine.transition('match')
+        }
     }
 }
 

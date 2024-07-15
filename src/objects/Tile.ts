@@ -50,7 +50,7 @@ class Tile extends Phaser.GameObjects.Sprite {
         // this.emitter.startFollow(this)
     }
 
-    public getExplodedTile(grid: Grid): (Tile | undefined)[] {
+    public getExplodedTile(grid: Grid, key = ''): (Tile | undefined)[] {
         return []
     }
 
@@ -61,6 +61,10 @@ class Tile extends Phaser.GameObjects.Sprite {
         }).on('animationcomplete', () => {
             this.destroy()
         })
+    }
+
+    public swapDestroy(grid: Grid, tile: Tile): (Tile | undefined)[] {
+        return []
     }
 }
 
