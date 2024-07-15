@@ -134,6 +134,10 @@ class Grid extends Phaser.GameObjects.Container {
         return this.secondHintBox
     }
 
+    public reshuffle(): void {
+        return
+    }
+
     public addTile(x: number, y: number): Tile {
         const randomType = TYPES[Phaser.Math.RND.between(0, TYPES.length - 1)]
         const tile = new Tile({

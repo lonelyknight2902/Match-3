@@ -22,23 +22,29 @@ class ShuffleState extends State {
     public enter(): void {
         console.log('ShuffleState: enter')
         const tileGrid = this.grid.getTileGrid()
-        this.tileGroup.clear(true, true)
+        this.tileGroup.clear(false, false)
         for (let y = 0; y < BOARD_HEIGHT; y++) {
             // tileGrid[y] = []
             if (!tileGrid[y]) tileGrid[y] = []
             for (let x = 0; x < BOARD_WIDTH; x++) {
-                if (tileGrid[y][x] !== undefined) {
-                    const tile: Tile = tileGrid[y][x] as Tile
-                    this.grid.remove(tile)
-                    this.grid.remove(tile.emitter)
-                    tile.destroy()
-                }
+                // if (tileGrid[y][x] !== undefined) {
+                //     const tile: Tile = tileGrid[y][x] as Tile
+                //     this.grid.remove(tile)
+                //     this.grid.remove(tile.emitter)
+                //     tile.destroy()
+                // }
                 // if (!this.spawned) {
-                const tile = this.grid.addTile(x, y)
-                tileGrid[y][x] = tile
+                let tile = tileGrid[y][x]
+                if (tile) {
+                    this.tileGroup.add(tile)
+                } else {
+                    tile = this.grid.addTile(x, y)
+                    tileGrid[y][x] = tile
+                    this.tileGroup.add(tile)
+                }
+
                 // this.grid.add(tile)
                 // this.grid.add(tile.emitter)
-                this.tileGroup.add(tile)
                 // }
             }
         }
@@ -62,18 +68,45 @@ class ShuffleState extends State {
         //         this.tileGroup.add(tile)
         //     }
         // }
-        this.spawned = true
-        Phaser.Actions.PlaceOnCircle(this.tileGroup.getChildren(), this.circle)
+        if (this.spawned) {
+            for (let y = 0; y < tileGrid.length; y++) {
+                for (let x = 0; x < tileGrid[y].length; x++) {
+                    const tile = tileGrid[y][x]
+                    if (tile) {
+                        tile.state = 'created'
+                        this.scene.tweens.add({
+                            targets: tile,
+                            x: PADDING + 4 * (TILE_SIZE + GAP) + TILE_SIZE / 2,
+                            y: PADDING + 4 * (TILE_SIZE + GAP) + TILE_SIZE / 2,
+                            ease: 'Cubic.easeIn',
+                            duration: 300,
+                            delay: 50 * y + x * 50,
+                            repeat: 0,
+                            yoyo: false,
+                            onComplete: () => {
+                                tile.state = 'spawned'
+                            },
+                        })
+                    }
+                }
+            }
+        }
+        this.circle.radius = 64
+
         this.scene.tweens.add({
             targets: this.circle,
             radius: 228,
             ease: 'Quintic.easeInOut',
             duration: 2000,
+            delay: this.spawned ? 1500 : 0,
             repeat: 0,
+            onStart: () => {
+                Phaser.Actions.PlaceOnCircle(this.tileGroup.getChildren(), this.circle)
+            },
             onUpdate: () => {
                 Phaser.Actions.RotateAroundDistance(
                     this.tileGroup.getChildren(),
-                    { x: 400, y: 300 },
+                    { x: this.circle.x, y: this.circle.y },
                     0.1,
                     this.circle.radius
                 )
@@ -105,6 +138,7 @@ class ShuffleState extends State {
                 // this.stateMachine.transition('play')
             },
         })
+        this.spawned = true
     }
 
     public exit(): void {
