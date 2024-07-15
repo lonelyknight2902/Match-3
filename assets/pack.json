@@ -290,6 +290,36 @@
                 "type": "image",
                 "key": "popup",
                 "url": "assets/images/user-interfaces/popup.png"
+            },
+            {
+                "type": "audio",
+                "key": "cheers",
+                "url": "assets/audio/Cheers.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "gameMusic",
+                "url": "assets/audio/game_music.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "levelComplete",
+                "url": "assets/audio/Level_complete.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "jellyDestroy",
+                "url": "assets/audio/Jelly_destroy_02.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "drop",
+                "url": "assets/audio/drop2.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "wrongMatch",
+                "url": "assets/audio/Wrong_match.mp3"
             }
         ]
     }

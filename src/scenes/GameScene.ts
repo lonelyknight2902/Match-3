@@ -10,6 +10,7 @@ class GameScene extends Phaser.Scene {
     private scoreManager: ScoreManager
     private milestone: Milestone
     private stateMachine: StateMachine
+    private gameMusic: Phaser.Sound.BaseSound
     constructor() {
         super('GameScene')
     }
@@ -42,6 +43,8 @@ class GameScene extends Phaser.Scene {
             .graphics()
             .fillRect(this.grid.x, this.grid.y, this.grid.width, this.grid.height)
         this.grid.setMask(new Phaser.Display.Masks.GeometryMask(this, mask))
+        this.gameMusic = this.sound.add('gameMusic', { loop: true })
+        this.gameMusic.play()
         this.stateMachine = new StateMachine('play', {
             play: new PlayState(this.grid, this),
             milestone: new MilestoneState(this.grid, this),

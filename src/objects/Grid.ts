@@ -30,6 +30,9 @@ class Grid extends Phaser.GameObjects.Container {
     private tilesPool: TilesPool
     public stateMachine: StateMachine
     private scoreManager: ScoreManager
+    private jellyDestroy: Phaser.Sound.BaseSound
+    private jellyDrop: Phaser.Sound.BaseSound
+    private wrongMatch: Phaser.Sound.BaseSound
     constructor(scene: Phaser.Scene) {
         super(scene)
         this.scene = scene
@@ -58,6 +61,9 @@ class Grid extends Phaser.GameObjects.Container {
         //         // tileGroup.add(this.tileGrid[y][x])
         //     }
         // }
+        this.jellyDestroy = this.scene.sound.add('jellyDestroy')
+        this.jellyDrop = this.scene.sound.add('drop')
+        this.wrongMatch = this.scene.sound.add('wrongMatch')
         this.stateMachine = new StateMachine('shuffle', {
             shuffle: new ShuffleState(this, scene),
             play: new PlayState(this, scene),
@@ -138,10 +144,10 @@ class Grid extends Phaser.GameObjects.Container {
     public reshuffle(): void {
         let flatGrid = flatten2DArray(this.tileGrid)
         // do {
-            flatGrid = shuffleArray(flatGrid)
-            console.log('Grid check: ', flatGrid == this.tileGrid)
-            this.tileGrid = unflatten1DArray(flatGrid, BOARD_HEIGHT, BOARD_WIDTH)
-            console.log('Grid check: ', flatGrid == this.tileGrid)
+        flatGrid = shuffleArray(flatGrid)
+        console.log('Grid check: ', flatGrid == this.tileGrid)
+        this.tileGrid = unflatten1DArray(flatGrid, BOARD_HEIGHT, BOARD_WIDTH)
+        console.log('Grid check: ', flatGrid == this.tileGrid)
         // } while (this.getPossibleMove(this.tileGrid).length > 3)
         for (let y = 0; y < BOARD_HEIGHT; y++) {
             for (let x = 0; x < BOARD_WIDTH; x++) {
@@ -323,6 +329,7 @@ class Grid extends Phaser.GameObjects.Container {
             return true
         } else {
             // No match so just swap the tiles back to their original position and reset
+            if (this.firstSelectedTile && this.secondSelectedTile) this.wrongMatch.play()
             this.swapTiles()
             this.tileUp()
             this.canMove = true
@@ -354,6 +361,7 @@ class Grid extends Phaser.GameObjects.Container {
                             yoyo: false,
                             onComplete: () => {
                                 tile.state = 'spawned'
+                                this.jellyDrop.play()
                             },
                             onStart: () => {
                                 tile.state = 'moving'
@@ -403,6 +411,7 @@ class Grid extends Phaser.GameObjects.Container {
                         delay: rowAmount[x] * 50,
                         onComplete: () => {
                             tile.state = 'spawned'
+                            this.jellyDrop.play()
                         },
                     })
                     rowAmount[x]++
@@ -487,6 +496,7 @@ class Grid extends Phaser.GameObjects.Container {
                                         this.explosionPool.despawn(tile.emitter)
                                     })
                                     this.specialTileEffectPool.despawn(tile.specialEmitter)
+                                    this.jellyDestroy.play()
                                     tile.destroy()
                                 },
                             })
@@ -540,6 +550,7 @@ class Grid extends Phaser.GameObjects.Container {
                                     })
                                     this.specialTileEffectPool.despawn(tile.specialEmitter)
                                     tile.destroy()
+                                    this.jellyDestroy.play()
                                 },
                             })
                             this.tileGrid[match.y + dy][match.x + dx] = undefined
@@ -571,6 +582,7 @@ class Grid extends Phaser.GameObjects.Container {
                 }
             })
             tile.explode()
+            this.jellyDestroy.play()
             // tile?.destroy()
         }
     }

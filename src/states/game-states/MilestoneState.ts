@@ -12,6 +12,8 @@ class MilestoneState extends State {
     private confetti: Phaser.GameObjects.Particles.ParticleEmitter
     private overlay: Phaser.GameObjects.Graphics
     private completeMenu: Complete
+    private cheers: Phaser.Sound.BaseSound
+    private levelComplete: Phaser.Sound.BaseSound
     constructor(grid: Grid, scene: Phaser.Scene) {
         super()
         this.grid = grid
@@ -19,6 +21,8 @@ class MilestoneState extends State {
         this.elapsedTime = 0
         this.scoreManager = ScoreManager.getInstance(this.scene)
         this.shuffled = false
+        this.cheers = this.scene.sound.add('cheers')
+        this.levelComplete = this.scene.sound.add('levelComplete')
         this.overlay = this.scene.add.graphics()
         this.overlay.fillStyle(0x000000, 0)
         this.overlay.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -78,6 +82,8 @@ class MilestoneState extends State {
         this.scoreManager.setMilestone(
             Math.floor(this.scoreManager.getScore() / 1000) * 1000 + 1000
         )
+        this.cheers.play()
+        this.levelComplete.play()
         this.confetti.explode(200, SCREEN_WIDTH / 2, SCREEN_HEIGHT)
         this.scene.tweens.add({
             targets: this.completeMenu,
