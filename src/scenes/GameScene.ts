@@ -1,6 +1,6 @@
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../constants'
 import { ScoreManager } from '../managers'
-import { Grid, Milestone } from '../objects'
+import { Complete, Grid, Milestone } from '../objects'
 import { PlayState, MilestoneState } from '../states/game-states'
 import StateMachine from '../states/StateMachine'
 

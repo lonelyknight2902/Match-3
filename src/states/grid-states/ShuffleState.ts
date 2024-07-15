@@ -77,8 +77,8 @@ class ShuffleState extends State {
                         tile.state = 'created'
                         this.scene.tweens.add({
                             targets: tile,
-                            x: PADDING + 4 * (TILE_SIZE + GAP) + TILE_SIZE / 2,
-                            y: PADDING + 4 * (TILE_SIZE + GAP) + TILE_SIZE / 2,
+                            x: this.circle.x,
+                            y: this.circle.y,
                             ease: 'Cubic.easeIn',
                             duration: 300,
                             delay: 50 * y + x * 50,

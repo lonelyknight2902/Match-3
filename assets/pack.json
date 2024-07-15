@@ -285,6 +285,11 @@
                 "type": "image",
                 "key": "fillBar",
                 "url": "assets/images/user-interfaces/star_bar.png"
+            },
+            {
+                "type": "image",
+                "key": "popup",
+                "url": "assets/images/user-interfaces/popup.png"
             }
         ]
     }
