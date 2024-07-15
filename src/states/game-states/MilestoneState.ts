@@ -20,9 +20,10 @@ class MilestoneState extends State {
         this.confetti = this.scene.add.particles(0, 0, 'confetti', {
             frequency: 1000 / 60,
             lifespan: 10000,
-            speed: { min: 500, max: 1000},
+            speedY: { min: -6000, max: -4000 },
+            speedX: { min: -500, max: 500},
             angle: { min: -85, max: -95 },
-            gravityY: 500,
+            gravityY: 1000,
             frame: [0, 4, 8, 12, 16],
             quantity: 100,
             x: { min: 0, max: 800 },
@@ -45,6 +46,22 @@ class MilestoneState extends State {
                     return 2 * 360 * Math.sign(particle.velocityX) * particle.lifeT
                 },
             },
+            accelerationX: {
+                onEmit: (particle) => {
+                    return 0
+                },
+                onUpdate: (particle) => {
+                    return -particle.velocityX * 0.5
+                },
+            },
+            accelerationY: {
+                onEmit: (particle) => {
+                    return 0
+                },
+                onUpdate: (particle) => {
+                    return -particle.velocityY * Phaser.Math.Between(3, 4)
+                },
+            },
         })
         // this.confetti.stop()
     }
@@ -54,7 +71,7 @@ class MilestoneState extends State {
         this.scoreManager.setMilestone(
             Math.floor(this.scoreManager.getScore() / 1000) * 1000 + 1000
         )
-        this.confetti.explode(50, SCREEN_WIDTH / 2, SCREEN_HEIGHT)
+        this.confetti.explode(200, SCREEN_WIDTH / 2, SCREEN_HEIGHT)
     }
 
     public exit(): void {

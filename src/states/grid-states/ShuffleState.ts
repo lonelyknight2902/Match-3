@@ -48,6 +48,7 @@ class ShuffleState extends State {
                 // }
             }
         }
+        // this.grid.reshuffle()
         // for (let y = 0; y < BOARD_HEIGHT; y++) {
         //     // tileGrid[y] = []
         //     // if (!tileGrid[y]) tileGrid[y] = []

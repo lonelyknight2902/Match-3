@@ -11,6 +11,7 @@ import { ScoreManager } from '../managers'
 import { ExplosionPool, SpecialTileEffectPool, TilesPool } from '../object-pools'
 import { ShuffleState, PlayState, MatchState, SwapState, FillState } from '../states/grid-states'
 import StateMachine from '../states/StateMachine'
+import { flatten2DArray, shuffleArray, unflatten1DArray } from '../utils'
 import CrossTile from './CrossTile'
 import HyperTile from './HyperTile'
 import SpecialTile from './SpecialTile'
@@ -135,7 +136,20 @@ class Grid extends Phaser.GameObjects.Container {
     }
 
     public reshuffle(): void {
-        return
+        let flatGrid = flatten2DArray(this.tileGrid)
+        // do {
+            flatGrid = shuffleArray(flatGrid)
+            console.log('Grid check: ', flatGrid == this.tileGrid)
+            this.tileGrid = unflatten1DArray(flatGrid, BOARD_HEIGHT, BOARD_WIDTH)
+            console.log('Grid check: ', flatGrid == this.tileGrid)
+        // } while (this.getPossibleMove(this.tileGrid).length > 3)
+        for (let y = 0; y < BOARD_HEIGHT; y++) {
+            for (let x = 0; x < BOARD_WIDTH; x++) {
+                if (this.tileGrid[y][x] != undefined) {
+                    this.setTilePosition(this.tileGrid[y][x] as Tile, x, y)
+                }
+            }
+        }
     }
 
     public addTile(x: number, y: number): Tile {
@@ -151,6 +165,11 @@ class Grid extends Phaser.GameObjects.Container {
         this.add(tile.emitter)
         // tile.on('pointerdown', this.tileDown, this)
         return tile
+    }
+
+    public setTilePosition(tile: Tile, x: number, y: number): void {
+        tile.x = PADDING + x * (TILE_SIZE + GAP) + TILE_SIZE / 2
+        tile.y = PADDING + y * (TILE_SIZE + GAP) + TILE_SIZE / 2
     }
 
     public tileDown(pointer: Phaser.Input.Pointer, tile: Tile, event: any) {
