@@ -1,0 +1,331 @@
+{
+    "preload": {
+        "files": [
+            {
+                "type": "image",
+                "key": "item1",
+                "url": "assets/images/items/item1/item_01.png"
+            },
+            {
+                "type": "image",
+                "key": "item2",
+                "url": "assets/images/items/item2/item_02.png"
+            },
+            {
+                "type": "image",
+                "key": "item3",
+                "url": "assets/images/items/item3/item_03.png"
+            },
+            {
+                "type": "image",
+                "key": "item4",
+                "url": "assets/images/items/item4/item_04.png"
+            },
+            {
+                "type": "image",
+                "key": "item5",
+                "url": "assets/images/items/item5/item_05.png"
+            },
+            {
+                "type": "image",
+                "key": "item6",
+                "url": "assets/images/items/item6/item_06.png"
+            },
+            {
+                "type": "image",
+                "key": "item1_extra",
+                "url": "assets/images/items/item1/item_01_extra.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_extra",
+                "url": "assets/images/items/item2/item_02_extra.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_extra",
+                "url": "assets/images/items/item3/item_03_extra.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_extra",
+                "url": "assets/images/items/item4/item_04_extra.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_extra",
+                "url": "assets/images/items/item5/item_05_extra.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_extra",
+                "url": "assets/images/items/item6/item_06_extra.png"
+            },
+            {
+                "type": "image",
+                "key": "item1_explode_1",
+                "url": "assets/images/items/item1/explosion_item_01/explosion-of-red-candy-1.png"
+            },
+            {
+                "type": "image",
+                "key": "item1_explode_2",
+                "url": "assets/images/items/item1/explosion_item_01/explosion-of-red-candy-2.png"
+            },
+            {
+                "type": "image",
+                "key": "item1_explode_3",
+                "url": "assets/images/items/item1/explosion_item_01/explosion-of-red-candy-3.png"
+            },
+            {
+                "type": "image",
+                "key": "item1_explode_4",
+                "url": "assets/images/items/item1/explosion_item_01/explosion-of-red-candy-4.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_explode_1",
+                "url": "assets/images/items/item2/explosion_item_02/explosion-of-orange-candy-1.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_explode_2",
+                "url": "assets/images/items/item2/explosion_item_02/explosion-of-orange-candy-2.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_explode_3",
+                "url": "assets/images/items/item2/explosion_item_02/explosion-of-orange-candy-3.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_explode_4",
+                "url": "assets/images/items/item2/explosion_item_02/explosion-of-orange-candy-4.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_explode_1",
+                "url": "assets/images/items/item3/explosion_item_03/explosion-of-purple-candy-1.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_explode_2",
+                "url": "assets/images/items/item3/explosion_item_03/explosion-of-purple-candy-2.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_explode_3",
+                "url": "assets/images/items/item3/explosion_item_03/explosion-of-purple-candy-3.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_explode_4",
+                "url": "assets/images/items/item3/explosion_item_03/explosion-of-purple-candy-4.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_explode_1",
+                "url": "assets/images/items/item4/explosion_item_04/explosion-of-blue-candy-1.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_explode_2",
+                "url": "assets/images/items/item4/explosion_item_04/explosion-of-blue-candy-2.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_explode_3",
+                "url": "assets/images/items/item4/explosion_item_04/explosion-of-blue-candy-3.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_explode_4",
+                "url": "assets/images/items/item4/explosion_item_04/explosion-of-blue-candy-4.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_explode_1",
+                "url": "assets/images/items/item5/explosion_item_05/explosion-of-green-candy-1.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_explode_2",
+                "url": "assets/images/items/item5/explosion_item_05/explosion-of-green-candy-2.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_explode_3",
+                "url": "assets/images/items/item5/explosion_item_05/explosion-of-green-candy-3.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_explode_4",
+                "url": "assets/images/items/item5/explosion_item_05/explosion-of-green-candy-4.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_explode_1",
+                "url": "assets/images/items/item6/explosion_item_06/explosion-of-yellow-candy-1.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_explode_2",
+                "url": "assets/images/items/item6/explosion_item_06/explosion-of-yellow-candy-2.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_explode_3",
+                "url": "assets/images/items/item6/explosion_item_06/explosion-of-yellow-candy-3.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_explode_4",
+                "url": "assets/images/items/item6/explosion_item_06/explosion-of-yellow-candy-4.png"
+            },
+            {
+                "type": "image",
+                "key": "item1_stripes_h",
+                "url": "assets/images/items/item1/item_01_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item1_stripes_v",
+                "url": "assets/images/items/item1/item_01_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_stripes_h",
+                "url": "assets/images/items/item2/item_02_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item2_stripes_v",
+                "url": "assets/images/items/item2/item_02_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_stripes_h",
+                "url": "assets/images/items/item3/item_03_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item3_stripes_v",
+                "url": "assets/images/items/item3/item_03_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_stripes_h",
+                "url": "assets/images/items/item4/item_04_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item4_stripes_v",
+                "url": "assets/images/items/item4/item_04_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_stripes_h",
+                "url": "assets/images/items/item5/item_05_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item5_stripes_v",
+                "url": "assets/images/items/item5/item_05_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_stripes_h",
+                "url": "assets/images/items/item6/item_06_stripes_horiz.png"
+            },
+            {
+                "type": "image",
+                "key": "item6_stripes_v",
+                "url": "assets/images/items/item6/item_06_stripes_vert.png"
+            },
+            {
+                "type": "image",
+                "key": "choco",
+                "url": "assets/images/items/candy10_choco.png"
+            },
+            {
+                "type": "image",
+                "key": "grid",
+                "url": "assets/images/grid.png"
+            },
+            {
+                "type":"image",
+                "key":"selectedTile",
+                "url":"assets/images/selectedTile.png"
+            },
+            {
+                "type":"image",
+                "key": "muzzleFlash",
+                "url": "assets/images/muzzle_flash_8.png"
+            }, 
+            {
+                "type":"image",
+                "key": "star",
+                "url": "assets/images/star_07.png"
+            },
+            {
+                "type": "image",
+                "key": "roomBackground",
+                "url": "assets/images/roombg.png"
+            },
+            {
+                "type": "image",
+                "key": "topBar",
+                "url": "assets/images/topbar.png"
+            },
+            {
+                "type": "image",
+                "key": "score",
+                "url": "assets/images/user-interfaces/score_txt.png"
+            },
+            {
+                "type": "image",
+                "key": "bar",
+                "url": "assets/images/user-interfaces/gui_for_star_bar_01.png"
+            },
+            {
+                "type": "image",
+                "key": "fillBar",
+                "url": "assets/images/user-interfaces/star_bar.png"
+            },
+            {
+                "type": "image",
+                "key": "popup",
+                "url": "assets/images/user-interfaces/popup.png"
+            },
+            {
+                "type": "audio",
+                "key": "cheers",
+                "url": "assets/audio/Cheers.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "gameMusic",
+                "url": "assets/audio/game_music.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "levelComplete",
+                "url": "assets/audio/Level_complete.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "jellyDestroy",
+                "url": "assets/audio/Jelly_destroy_02.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "drop",
+                "url": "assets/audio/drop2.mp3"
+            },
+            {
+                "type": "audio",
+                "key": "wrongMatch",
+                "url": "assets/audio/Wrong_match.mp3"
+            }
+        ]
+    }
+}
